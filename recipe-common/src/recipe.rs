@@ -1,6 +1,7 @@
 use std::{collections::HashSet, slice::Iter};
 
 use anyhow::Error;
+use log::trace;
 use redis::{aio::MultiplexedConnection, AsyncCommands, ErrorKind, FromRedisValue, RedisError, RedisResult, Value};
 use serde::Serialize;
 use utoipa::ToSchema;
@@ -396,6 +397,6 @@ pub fn extract_terms(recipe: &Recipe) -> Vec<String> {
 }
 
 pub async fn get_recipes_by_term(mut redis_recipes: MultiplexedConnection, term: &str) -> HashSet<usize> {
-    redis_recipes.smembers(key_term_recipes(term)).await.unwrap_or(HashSet::new())
+    redis_recipes.smembers(key_term_recipes(term)).await.unwrap()
 }
 
