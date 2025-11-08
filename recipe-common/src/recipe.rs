@@ -397,6 +397,7 @@ pub fn extract_terms(recipe: &Recipe) -> Vec<String> {
 }
 
 pub async fn get_recipes_by_term(mut redis_recipes: MultiplexedConnection, term: &str) -> HashSet<usize> {
+    trace!("{:?}", term);
     redis_recipes.smembers(key_term_recipes(term)).await.unwrap()
 }
 

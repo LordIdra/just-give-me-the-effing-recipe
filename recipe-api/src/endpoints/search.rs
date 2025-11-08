@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use log::trace;
 use recipe_common::recipe::get_recipes_by_term;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -39,6 +40,7 @@ pub async fn search(
     Json(request): Json<SearchRequest>,
 ) -> impl IntoResponse {
     let mut recipes = HashSet::<usize>::new();
+    trace!("{:?}", request.terms);
     for term in request.terms {
         recipes.extend(&get_recipes_by_term(state.redis_recipes.clone(), &term).await)
     }
