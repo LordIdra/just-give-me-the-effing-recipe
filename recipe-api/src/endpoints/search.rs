@@ -44,7 +44,7 @@ pub async fn search(
     }
     recipes.extend(&get_recipes_by_term(state.redis_recipes.clone(), &request.terms[0]).await);
     for term in request.terms.iter().skip(1) {
-        recipes = recipes.union(&get_recipes_by_term(state.redis_recipes.clone(), term).await)
+        recipes = recipes.intersection(&get_recipes_by_term(state.redis_recipes.clone(), term).await)
             .copied()
             .collect()
     }
