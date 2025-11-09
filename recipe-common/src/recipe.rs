@@ -361,60 +361,60 @@ pub async fn add(mut redis_recipes: MultiplexedConnection, recipe: Recipe) -> Re
     recipe.date.as_ref().map(|v| pipe.set(key_recipe_date(id), v.to_string()));
     recipe.rating.as_ref().map(|v| {
         pipe.set(key_recipe_rating_count(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_rating()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_rating()).arg(v).arg(id)
     });
     recipe.rating_count.as_ref().map(|v| {
         pipe.set(key_recipe_rating_count(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_rating_count()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_rating_count()).arg(v).arg(id)
     });
     recipe.prep_time_seconds.as_ref().map(|v| {
         pipe.set(key_recipe_prep_time_seconds(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_prep_time_seconds()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_prep_time_seconds()).arg(v).arg(id)
     });
     recipe.cook_time_seconds.as_ref().map(|v| {
         pipe.set(key_recipe_cook_time_seconds(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_cook_time_seconds()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_cook_time_seconds()).arg(v).arg(id)
     });
     recipe.total_time_seconds.as_ref().map(|v| {
         pipe.set(key_recipe_total_time_seconds(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_total_time_seconds()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_total_time_seconds()).arg(v).arg(id)
     });
     recipe.servings.as_ref().map(|v| pipe.set(key_recipe_servings(id), v));
     recipe.calories.as_ref().map(|v| {
         pipe.set(key_recipe_calories(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_calories()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_calories()).arg(v).arg(id)
     });
     recipe.carbohydrates.as_ref().map(|v| {
         pipe.set(key_recipe_carbohydrates(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_carbohydrates()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_carbohydrates()).arg(v).arg(id)
     });
     recipe.cholesterol.as_ref().map(|v| {
         pipe.set(key_recipe_cholesterol(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_cholesterol()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_cholesterol()).arg(v).arg(id)
     });
     recipe.fat.as_ref().map(|v| {
         pipe.set(key_recipe_fat(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_fat()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_fat()).arg(v).arg(id)
     });
     recipe.fiber.as_ref().map(|v| {
         pipe.set(key_recipe_fiber(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_fiber()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_fiber()).arg(v).arg(id)
     });
     recipe.protein.as_ref().map(|v| {
         pipe.set(key_recipe_protein(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_protein()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_protein()).arg(v).arg(id)
     });
     recipe.saturated_fat.as_ref().map(|v| {
         pipe.set(key_recipe_saturated_fat(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_saturated_fat()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_saturated_fat()).arg(v).arg(id)
     });
     recipe.sodium.as_ref().map(|v| {
         pipe.set(key_recipe_sodium(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_sodium()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_sodium()).arg(v).arg(id)
     });
     recipe.sugar.as_ref().map(|v| {
         pipe.set(key_recipe_sugar(id), v);
-        pipe.cmd("zadd").arg(key_aggregated_sugar()).arg(v)
+        pipe.cmd("zadd").arg(key_aggregated_sugar()).arg(v).arg(id)
     });
 
     if !recipe.keywords.is_empty() {
