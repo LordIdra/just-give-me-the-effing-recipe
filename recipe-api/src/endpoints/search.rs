@@ -39,8 +39,14 @@ pub async fn search(
     Json(request): Json<SearchRequest>,
 ) -> impl IntoResponse {
     let mut recipes = HashSet::<usize>::new();
-    for term in request.terms {
-        recipes.extend(&get_recipes_by_term(state.redis_recipes.clone(), &term).await)
+    if request.terms.is_empty() {
+        return (StatusCode::OK, Json(recipes)).into_response();
+    }
+    recipes.extend(&get_recipes_by_term(state.redis_recipes.clone(), &request.terms[0]).await);
+    for term in request.terms.iter().skip(1) {
+        recipes = recipes.union(&get_recipes_by_term(state.redis_recipes.clone(), term).await)
+            .copied()
+            .collect()
     }
     (StatusCode::OK, Json(recipes)).into_response()
 }
