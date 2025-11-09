@@ -1,10 +1,16 @@
-use std::{collections::HashSet, slice::Iter};
+use std::{collections::HashSet, slice::Iter, sync::LazyLock};
 
 use anyhow::Error;
-use log::trace;
 use redis::{aio::MultiplexedConnection, AsyncCommands, ErrorKind, FromRedisValue, RedisError, RedisResult, Value};
+use regex::{Regex, RegexBuilder};
 use serde::Serialize;
 use utoipa::ToSchema;
+
+static DOES_NOT_CONTAIN_NUMBERS_REGEX: LazyLock<Regex> = LazyLock::new(|| 
+    RegexBuilder::new(r#"[^\d]+"#)
+        .build()
+        .unwrap()
+);
 
 #[derive(Serialize, Debug, Clone, ToSchema)]
 pub struct Recipe {
@@ -115,6 +121,11 @@ fn key_term_recipes(term: &str) -> String {
     format!("term:{term}:recipes")
 }
 
+// SET of all terms
+fn key_terms() -> String {
+    "terms".to_string()
+}
+
 // SET of all recipes associated with a title
 fn key_title_recipes(title: &str) -> String {
     format!("title:{title}:titles")
@@ -150,9 +161,19 @@ fn key_recipe_rating(id: u64) -> String {
     format!("recipe:{id}:rating")
 }
 
+// ORDERED SET
+fn key_aggregated_rating() -> String {
+    "recipe:aggregated:ratings".to_string()
+}
+
 // STRING
 fn key_recipe_rating_count(id: u64) -> String {
     format!("recipe:{id}:rating_count")
+}
+
+// ORDERED SET
+fn key_aggregated_rating_count() -> String {
+    "recipe:aggregated:rating_counts".to_string()
 }
 
 // STRING
@@ -160,14 +181,29 @@ fn key_recipe_prep_time_seconds(id: u64) -> String {
     format!("recipe:{id}:prep_time_seconds")
 }
 
+// ORDERED SET
+fn key_aggregated_prep_time_seconds() -> String {
+    "recipe:aggregated:prep_times_seconds".to_string()
+}
+
 // STRING
 fn key_recipe_cook_time_seconds(id: u64) -> String {
     format!("recipe:{id}:cook_time_seconds")
 }
 
+// ORDERED SET
+fn key_aggregated_cook_time_seconds() -> String {
+    "recipe:aggregated:cook_times_seconds".to_string()
+}
+
 // STRING
 fn key_recipe_total_time_seconds(id: u64) -> String {
     format!("recipe:{id}:total_time_seconds")
+}
+
+// ORDERED SET
+fn key_aggregated_total_time_seconds() -> String {
+    "recipe:aggregated:total_times_seconds".to_string()
 }
 
 // STRING
@@ -180,9 +216,19 @@ fn key_recipe_calories(id: u64) -> String {
     format!("recipe:{id}:calories")
 }
 
+// ORDERED SET
+fn key_aggregated_calories() -> String {
+    "recipe:aggregated:calories".to_string()
+}
+
 // STRING
 fn key_recipe_carbohydrates(id: u64) -> String {
     format!("recipe:{id}:carbohydrates")
+}
+
+// ORDERED SET
+fn key_aggregated_carbohydrates() -> String {
+    "recipe:aggregated:carbohydrates".to_string()
 }
 
 // STRING
@@ -190,9 +236,19 @@ fn key_recipe_cholesterol(id: u64) -> String {
     format!("recipe:{id}:cholesterol")
 }
 
+// ORDERED SET
+fn key_aggregated_cholesterol() -> String {
+    "recipe:aggregated:cholesterol".to_string()
+}
+
 // STRING
 fn key_recipe_fat(id: u64) -> String {
     format!("recipe:{id}:fat")
+}
+
+// ORDERED SET
+fn key_aggregated_fat() -> String {
+    "recipe:aggregated:fat".to_string()
 }
 
 // STRING
@@ -200,9 +256,19 @@ fn key_recipe_fiber(id: u64) -> String {
     format!("recipe:{id}:fiber")
 }
 
+// ORDERED SET
+fn key_aggregated_fiber() -> String {
+    "recipe:aggregated:fiber".to_string()
+}
+
 // STRING
 fn key_recipe_protein(id: u64) -> String {
     format!("recipe:{id}:protein")
+}
+
+// ORDERED SET
+fn key_aggregated_protein() -> String {
+    "recipe:aggregated:protein".to_string()
 }
 
 // STRING
@@ -210,14 +276,29 @@ fn key_recipe_saturated_fat(id: u64) -> String {
     format!("recipe:{id}:saturated_fat")
 }
 
+// ORDERED SET
+fn key_aggregated_saturated_fat() -> String {
+    "recipe:aggregated:saturated_fat".to_string()
+}
+
 // STRING
 fn key_recipe_sodium(id: u64) -> String {
     format!("recipe:{id}:sodium")
 }
 
+// ORDERED SET
+fn key_aggregated_sodium() -> String {
+    "recipe:aggregated:sodium".to_string()
+}
+
 // STRING
 fn key_recipe_sugar(id: u64) -> String {
     format!("recipe:{id}:sugar")
+}
+
+// ORDERED SET
+fn key_aggregated_sugar() -> String {
+    "recipe:aggregated:sugar".to_string()
 }
 
 // LIST
@@ -240,9 +321,19 @@ fn key_recipe_ingredients(id: u64) -> String {
     format!("recipe:{id}:ingredients")
 }
 
+// ORDERED SET
+fn key_aggregated_ingredient_count() -> String {
+    "recipe:aggregated:ingredient_count".to_string()
+}
+
 // LIST
 fn key_recipe_instructions(id: u64) -> String {
     format!("recipe:{id}:instructions")
+}
+
+// ORDERED SET
+fn key_aggregated_instruction_count() -> String {
+    "recipe:aggregated:instruction_count".to_string()
 }
 
 /// Returns true if added
@@ -268,21 +359,63 @@ pub async fn add(mut redis_recipes: MultiplexedConnection, recipe: Recipe) -> Re
     pipe.set(key_recipe_description(id), &recipe.description);
 
     recipe.date.as_ref().map(|v| pipe.set(key_recipe_date(id), v.to_string()));
-    recipe.rating.as_ref().map(|v| pipe.set(key_recipe_rating(id), v));
-    recipe.rating_count.as_ref().map(|v| pipe.set(key_recipe_rating_count(id), v));
-    recipe.prep_time_seconds.as_ref().map(|v| pipe.set(key_recipe_prep_time_seconds(id), v));
-    recipe.cook_time_seconds.as_ref().map(|v| pipe.set(key_recipe_cook_time_seconds(id), v));
-    recipe.total_time_seconds.as_ref().map(|v| pipe.set(key_recipe_total_time_seconds(id), v));
+    recipe.rating.as_ref().map(|v| {
+        pipe.set(key_recipe_rating_count(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_rating()).arg(v)
+    });
+    recipe.rating_count.as_ref().map(|v| {
+        pipe.set(key_recipe_rating_count(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_rating_count()).arg(v)
+    });
+    recipe.prep_time_seconds.as_ref().map(|v| {
+        pipe.set(key_recipe_prep_time_seconds(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_prep_time_seconds()).arg(v)
+    });
+    recipe.cook_time_seconds.as_ref().map(|v| {
+        pipe.set(key_recipe_cook_time_seconds(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_cook_time_seconds()).arg(v)
+    });
+    recipe.total_time_seconds.as_ref().map(|v| {
+        pipe.set(key_recipe_total_time_seconds(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_total_time_seconds()).arg(v)
+    });
     recipe.servings.as_ref().map(|v| pipe.set(key_recipe_servings(id), v));
-    recipe.calories.as_ref().map(|v| pipe.set(key_recipe_calories(id), v));
-    recipe.carbohydrates.as_ref().map(|v| pipe.set(key_recipe_carbohydrates(id), v));
-    recipe.cholesterol.as_ref().map(|v| pipe.set(key_recipe_cholesterol(id), v));
-    recipe.fat.as_ref().map(|v| pipe.set(key_recipe_fat(id), v));
-    recipe.fiber.as_ref().map(|v| pipe.set(key_recipe_fiber(id), v));
-    recipe.protein.as_ref().map(|v| pipe.set(key_recipe_protein(id), v));
-    recipe.saturated_fat.as_ref().map(|v| pipe.set(key_recipe_saturated_fat(id), v));
-    recipe.sodium.as_ref().map(|v| pipe.set(key_recipe_sodium(id), v));
-    recipe.sugar.as_ref().map(|v| pipe.set(key_recipe_sugar(id), v));
+    recipe.calories.as_ref().map(|v| {
+        pipe.set(key_recipe_calories(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_calories()).arg(v)
+    });
+    recipe.carbohydrates.as_ref().map(|v| {
+        pipe.set(key_recipe_carbohydrates(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_carbohydrates()).arg(v)
+    });
+    recipe.cholesterol.as_ref().map(|v| {
+        pipe.set(key_recipe_cholesterol(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_cholesterol()).arg(v)
+    });
+    recipe.fat.as_ref().map(|v| {
+        pipe.set(key_recipe_fat(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_fat()).arg(v)
+    });
+    recipe.fiber.as_ref().map(|v| {
+        pipe.set(key_recipe_fiber(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_fiber()).arg(v)
+    });
+    recipe.protein.as_ref().map(|v| {
+        pipe.set(key_recipe_protein(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_protein()).arg(v)
+    });
+    recipe.saturated_fat.as_ref().map(|v| {
+        pipe.set(key_recipe_saturated_fat(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_saturated_fat()).arg(v)
+    });
+    recipe.sodium.as_ref().map(|v| {
+        pipe.set(key_recipe_sodium(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_sodium()).arg(v)
+    });
+    recipe.sugar.as_ref().map(|v| {
+        pipe.set(key_recipe_sugar(id), v);
+        pipe.cmd("zadd").arg(key_aggregated_sugar()).arg(v)
+    });
 
     if !recipe.keywords.is_empty() {
         pipe.cmd("lpush").arg(key_recipe_keywords(id));
@@ -310,6 +443,7 @@ pub async fn add(mut redis_recipes: MultiplexedConnection, recipe: Recipe) -> Re
         for ingredient in recipe.ingredients.iter().rev() {
             pipe.arg(ingredient);
         }
+        pipe.cmd("zadd").arg(key_aggregated_ingredient_count()).arg(recipe.ingredients.len()).arg(id);
     }
 
     if !recipe.instructions.is_empty() {
@@ -317,10 +451,12 @@ pub async fn add(mut redis_recipes: MultiplexedConnection, recipe: Recipe) -> Re
         for instruction in recipe.instructions.iter().rev() {
             pipe.arg(instruction);
         }
+        pipe.cmd("zadd").arg(key_aggregated_instruction_count()).arg(recipe.instructions.len()).arg(id);
     }
     
     for term in extract_terms(&recipe) {
         pipe.sadd(key_term_recipes(&term), id);
+        pipe.sadd(key_terms(), term);
     }
 
     pipe.exec_async(&mut redis_recipes).await?;
@@ -376,28 +512,26 @@ pub async fn get_recipe(mut redis_recipes: MultiplexedConnection, id: u64) -> Re
     Ok(recipe)
 }
 
-fn split_by_space(string: &str) -> Vec<String> {
-    string.split(' ').map(|v| v.to_string()).collect()
+fn extract_keywords_from_string(string: &str) -> Vec<String> {
+    string.split(' ')
+        .map(|v| v.to_string())
+        .filter(|v| DOES_NOT_CONTAIN_NUMBERS_REGEX.is_match(v))
+        .collect()
 }
 
 pub fn extract_terms(recipe: &Recipe) -> Vec<String> {
     let mut terms = vec![];
-    terms.append(&mut split_by_space(&recipe.title));
-    terms.append(&mut split_by_space(&recipe.description));
+    terms.append(&mut extract_keywords_from_string(&recipe.title));
     for keyword in &recipe.keywords {
-        terms.append(&mut split_by_space(keyword));
+        terms.append(&mut extract_keywords_from_string(keyword));
     }
     for ingredient in &recipe.ingredients {
-        terms.append(&mut split_by_space(ingredient));
+        terms.append(&mut extract_keywords_from_string(ingredient));
     }
-    for instruction in &recipe.instructions {
-        terms.append(&mut split_by_space(instruction));
-    }
-    terms
+    terms.iter().map(|term| term.to_lowercase()).collect()
 }
 
 pub async fn get_recipes_by_term(mut redis_recipes: MultiplexedConnection, term: &str) -> HashSet<usize> {
-    trace!("{:?}", term);
     redis_recipes.smembers(key_term_recipes(term)).await.unwrap()
 }
 
