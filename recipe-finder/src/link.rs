@@ -4,7 +4,7 @@ use anyhow::Error;
 use log::{debug, info, trace, warn};
 use recipe_common::{link::{self, LinkMissingDomainError, LinkStatus}, recipe::{self, Recipe}};
 use redis::aio::MultiplexedConnection;
-use reqwest::{Certificate, Client, ClientBuilder, Proxy};
+use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
 use tokio::{sync::Semaphore, time::interval};
 
@@ -183,19 +183,10 @@ pub async fn process(
 pub async fn run(
     redis_links: MultiplexedConnection, 
     redis_recipes: MultiplexedConnection, 
-    proxy: String, 
-    certificates: Vec<Certificate>
 ) {
     info!("Started processor");
 
-    let mut builder = ClientBuilder::new()
-        .proxy(Proxy::https(proxy).unwrap());
-    
-    for certificate in certificates {
-        builder = builder.add_root_certificate(certificate);
-    }
-    
-    let client = builder.build().unwrap();
+    let client = ClientBuilder::new().build().unwrap();
     let semaphore = Arc::new(Semaphore::new(4096));
     let mut interval = interval(Duration::from_millis(500));
 

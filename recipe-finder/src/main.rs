@@ -1,11 +1,10 @@
 use std::fmt;
 use std::time::Duration;
-use std::{error::Error, fs::File};
-use std::io::Read;
+use std::error::Error;
 
 use clap::Parser;
 use log::info;
-use reqwest::{Certificate, StatusCode};
+use reqwest::StatusCode;
 use sqlx::mysql::MySqlPoolOptions;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
@@ -27,8 +26,6 @@ impl Error for UnexpectedStatusCodeErr {}
 
 #[derive(Parser, Debug)]
 struct Args {
-    #[arg(long)]
-    proxy: String,
     #[arg(long)]
     crt_file: String,
     #[arg(long)]
@@ -53,14 +50,6 @@ async fn main() {
 
     let args = Args::parse();
 
-    let mut buf = vec![];
-    File::open(args.crt_file)
-        .unwrap()
-        .read_to_end(&mut buf)
-        .unwrap();
-
-    let certificates = Certificate::from_pem_bundle(&buf).unwrap();
-
     let mysql = MySqlPoolOptions::new()
         .test_before_acquire(true)
         .max_connections(200)
@@ -83,7 +72,7 @@ async fn main() {
 
     recipe_common::link::reset_tasks(redis_links.clone()).await.expect("Failed to reset link tasks");
 
-    tokio::spawn(link::run(redis_links.clone(), redis_recipes.clone(), args.proxy, certificates));
+    tokio::spawn(link::run(redis_links.clone(), redis_recipes.clone()));
     // await to prevent program from exiting
     let _ = tokio::spawn(statistic::run(redis_links.clone(), redis_recipes.clone(), mysql)).await;
 }
