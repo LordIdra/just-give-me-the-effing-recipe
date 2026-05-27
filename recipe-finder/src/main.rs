@@ -27,8 +27,6 @@ impl Error for UnexpectedStatusCodeErr {}
 #[derive(Parser, Debug)]
 struct Args {
     #[arg(long)]
-    crt_file: String,
-    #[arg(long)]
     mysql_url: String,
     #[arg(long)]
     redis_links_url: String,
