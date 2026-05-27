@@ -84,7 +84,7 @@ async fn main() {
         .split_for_parts();
     let main_router = main_router.merge(Redoc::with_url("/docs", api.clone()));
 
-    let listener = TcpListener::bind(format!("127.0.0.1:{}", args.port)).await.unwrap();
+    let listener = TcpListener::bind(format!("0.0.0.0:{}", args.port)).await.unwrap();
 
     axum::serve(listener, main_router.into_make_service()).await.unwrap();
 }
