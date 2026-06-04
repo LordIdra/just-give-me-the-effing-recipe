@@ -2,7 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use anyhow::Error;
 use log::{debug, info, trace, warn};
-use recipe_common::{link::{self, LinkMissingDomainError, LinkStatus}, recipe::{self, Recipe}};
+use recipe_common::{link::{self, LinkMissingDomainError, LinkStatus}, profile, recipe::{self, Recipe}};
 use redis::aio::MultiplexedConnection;
 use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
