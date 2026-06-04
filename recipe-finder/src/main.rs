@@ -6,6 +6,10 @@ use clap::Parser;
 use log::info;
 use reqwest::StatusCode;
 use sqlx::mysql::MySqlPoolOptions;
+use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::Layer;
+use tracing_subscriber::{layer::SubscriberExt, EnvFilter};
+use tracing_tracy::TracyLayer;
 
 mod link;
 mod statistic;
@@ -33,6 +37,15 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
+    let fmt_layer = tracing_subscriber::fmt::layer()
+        .with_line_number(true)
+        .with_filter(EnvFilter::new("recipe_finder=trace,recipe_common=trace"));
+
+    tracing_subscriber::registry()
+        .with(fmt_layer)
+        .with(TracyLayer::default())
+        .init();
+
     info!("Starting...");
 
     let args = Args::parse();
