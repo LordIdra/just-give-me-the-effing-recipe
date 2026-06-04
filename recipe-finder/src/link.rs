@@ -13,7 +13,7 @@ pub mod extractor;
 pub mod follower;
 pub mod parser;
 
-#[tracing::instrument(skip(redis_links, client))]
+#[tracing::instrument(skip_all, name = "Process download")]
 pub async fn process_download(
     redis_links: MultiplexedConnection, 
     client: Client, 
@@ -28,7 +28,7 @@ pub async fn process_download(
     }
 }
 
-#[tracing::instrument(skip(redis_links, contents))]
+#[tracing::instrument(skip_all, name = "Process extract")]
 pub async fn process_extract(
     redis_links: MultiplexedConnection, 
     contents: String,
@@ -53,7 +53,7 @@ pub async fn process_extract(
     Ok(extracted)
 }
 
-#[tracing::instrument(skip(redis_links, redis_recipes, schema))]
+#[tracing::instrument(skip_all, name = "Process parse")]
 pub async fn process_parse(
     redis_links: MultiplexedConnection, 
     redis_recipes: MultiplexedConnection, 
@@ -78,7 +78,7 @@ pub async fn process_parse(
     Ok(Some(parsed))
 }
 
-#[tracing::instrument(skip(redis_links, contents, recipe))]
+#[tracing::instrument(skip_all, name = "Process follow")]
 pub async fn process_follow(
     redis_links: MultiplexedConnection, 
     contents: String,
@@ -132,7 +132,7 @@ pub async fn process_follow(
     Ok(())
 }
 
-#[tracing::instrument(skip(redis_links, redis_recipes, client, semaphore))]
+#[tracing::instrument(skip_all, name = "Process link")]
 pub async fn process(
     redis_links: MultiplexedConnection, 
     redis_recipes: MultiplexedConnection, 

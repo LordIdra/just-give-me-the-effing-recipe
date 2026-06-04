@@ -338,7 +338,7 @@ fn key_aggregated_instruction_count() -> String {
 
 /// Returns true if added
 /// Returns false if already existed or matches the blacklist
-#[tracing::instrument(skip(redis_recipes))]
+#[tracing::instrument(skip_all, name = "Add recipe")]
 pub async fn add(mut redis_recipes: MultiplexedConnection, recipe: Recipe) -> Result<bool, Error> {
     if exists(redis_recipes.clone(), &recipe).await? {
         return Ok(false);
@@ -464,12 +464,12 @@ pub async fn add(mut redis_recipes: MultiplexedConnection, recipe: Recipe) -> Re
     Ok(true)
 }
 
-#[tracing::instrument(skip(redis_recipes))]
+#[tracing::instrument(skip_all)]
 pub async fn recipe_count(mut redis_recipes: MultiplexedConnection) -> Result<usize, Error> {
     Ok(redis_recipes.scard(key_recipes()).await?)
 }
 
-#[tracing::instrument(skip(redis_recipes))]
+#[tracing::instrument(skip_all, name = "Does recipe exist")]
 async fn exists(mut redis_recipes: MultiplexedConnection, recipe: &Recipe) -> Result<bool, Error> {
     let recipes_with_titles: Vec<usize> = redis_recipes.smembers(key_title_recipes(&recipe.title)).await?;
     let recipes_with_description: Vec<usize> = redis_recipes.smembers(key_description_recipes(&recipe.description)).await?;
@@ -477,7 +477,7 @@ async fn exists(mut redis_recipes: MultiplexedConnection, recipe: &Recipe) -> Re
     Ok(recipes_with_titles.iter().any(|x| recipes_with_description.contains(x)))
 }
 
-#[tracing::instrument(skip(redis_recipes))]
+#[tracing::instrument(skip_all)]
 pub async fn get_recipe(mut redis_recipes: MultiplexedConnection, id: u64) -> Result<Recipe, Error> {
     let mut pipe = redis::pipe();
 
@@ -519,6 +519,7 @@ fn extract_keywords_from_string(string: &str) -> Vec<String> {
         .collect()
 }
 
+#[tracing::instrument(skip_all)]
 pub fn extract_terms(recipe: &Recipe) -> Vec<String> {
     let mut terms = vec![];
     terms.append(&mut extract_keywords_from_string(&recipe.title));
@@ -531,6 +532,7 @@ pub fn extract_terms(recipe: &Recipe) -> Vec<String> {
     terms.iter().map(|term| term.to_lowercase()).collect()
 }
 
+#[tracing::instrument(skip_all)]
 pub async fn get_recipes_by_term(mut redis_recipes: MultiplexedConnection, term: &str) -> HashSet<usize> {
     redis_recipes.smembers(key_term_recipes(term)).await.unwrap()
 }

@@ -7,7 +7,7 @@ fn key_blacklist() -> String {
 
 /// Returns true if added
 /// Returns false if already existed
-#[tracing::instrument(skip(pool))]
+#[tracing::instrument(skip_all, name = "Add link to blacklist")]
 pub async fn add(mut pool: MultiplexedConnection, word: &str) -> Result<bool, Error> {
     if exists(pool.clone(), word).await? {
         return Ok(false);
@@ -18,12 +18,12 @@ pub async fn add(mut pool: MultiplexedConnection, word: &str) -> Result<bool, Er
     Ok(true)
 }
 
-#[tracing::instrument(skip(pool))]
+#[tracing::instrument(skip_all, name = "Is word blacklisted")]
 async fn exists(mut pool: MultiplexedConnection, word: &str) -> Result<bool, Error> {
     Ok(pool.sismember(key_blacklist(), word).await?)
 }
 
-#[tracing::instrument(skip(pool))]
+#[tracing::instrument(skip_all, name = "Is link allowed")]
 pub async fn is_allowed(mut pool: MultiplexedConnection, link: &str) -> Result<bool, Error> {
     let blacklist: Vec<String> = pool.smembers(key_blacklist()).await?;
 

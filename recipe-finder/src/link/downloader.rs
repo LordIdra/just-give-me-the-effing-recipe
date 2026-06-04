@@ -33,7 +33,7 @@ pub fn headers() -> HeaderMap {
     headers
 }
 
-#[tracing::instrument(skip(redis_links, client))]
+#[tracing::instrument(skip_all, name = "Download link")]
 pub async fn download(redis_links: MultiplexedConnection, client: Client, job: String) -> Result<String, Error> {
     let domain = link::get_domain(redis_links.clone(), &job).await?;
 

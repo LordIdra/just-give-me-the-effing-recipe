@@ -384,7 +384,7 @@ fn sugar(v: &Value) -> Option<f32> {
         .and_then(|v| v.parse::<f32>().ok())
 }
 
-#[tracing::instrument(skip(schema))]
+#[tracing::instrument(skip_all, name = "Parse link")]
 pub async fn parse(link: String, schema: Value) -> Option<Recipe> {
     let title = title(&schema)?;
     let description = description(&schema)?;

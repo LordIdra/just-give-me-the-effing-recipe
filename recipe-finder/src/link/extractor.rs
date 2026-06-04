@@ -26,7 +26,7 @@ mod c_extractor {
     }
 }
 
-#[tracing::instrument(skip(contents))]
+#[tracing::instrument(skip_all, name = "Extract link")]
 pub async fn extract(link: &str, contents: &str) -> Result<Option<Value>, Error> {
     let Some(schema) = c_extractor::extract_wrapper(contents) else {
         return Ok(None);

@@ -15,7 +15,7 @@ static HREF_REGEX: LazyLock<Regex> = LazyLock::new(||
         .unwrap()
 );
 
-#[tracing::instrument(skip(contents))]
+#[tracing::instrument(skip_all, name = "Follow link")]
 pub async fn follow(contents: String, link: String) -> Vec<String> {
     let url = Url::parse(&link)
         .expect("How did you screw this up");
