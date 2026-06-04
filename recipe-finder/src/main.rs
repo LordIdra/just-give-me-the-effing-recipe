@@ -9,6 +9,7 @@ use sqlx::mysql::MySqlPoolOptions;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 use tracing_subscriber::{layer::SubscriberExt, EnvFilter};
+use tracing_tracy::TracyLayer;
 
 mod link;
 mod statistic;
@@ -42,6 +43,7 @@ async fn main() {
 
     tracing_subscriber::registry()
         .with(fmt_layer)
+        .with(TracyLayer::default())
         .init();
 
     info!("Starting...");
