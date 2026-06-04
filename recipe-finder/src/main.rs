@@ -4,7 +4,6 @@ use std::error::Error;
 
 use clap::Parser;
 use log::info;
-use recipe_common::profile;
 use reqwest::StatusCode;
 use sqlx::mysql::MySqlPoolOptions;
 
@@ -34,8 +33,6 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
-    profile!("Startup");
-
     info!("Starting...");
 
     let args = Args::parse();

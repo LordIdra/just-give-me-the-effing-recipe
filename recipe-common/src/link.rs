@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use tokio::task::JoinSet;
 use url::Url;
 
-use crate::{link_blacklist, profile};
+use crate::link_blacklist;
 
 #[derive(Debug)]
 pub struct ProcessingLinkNotFoundError;
@@ -109,8 +109,6 @@ fn key_link_to_content_size() -> String {
 
 #[tracing::instrument(skip(pool))]
 pub async fn reset_tasks(mut pool: MultiplexedConnection) -> Result<(), Error> {
-    profile!("Reset tasks");
-
     let processing: Vec<String> = pool.zrange(key_status_to_links(LinkStatus::Processing), 0, -1).await?;
     for link in processing {
         update_status(pool.clone(), &link, LinkStatus::Waiting).await?;
