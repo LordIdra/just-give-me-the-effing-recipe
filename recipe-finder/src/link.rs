@@ -192,6 +192,8 @@ pub async fn run(
 
     loop {
         interval.tick().await;
+
+        profile!("Poll link");
         
         if semaphore.available_permits() == 0 {
             continue;
