@@ -43,7 +43,6 @@ async fn main() {
 
     tracing_subscriber::registry()
         .with(fmt_layer)
-        .with(TracyLayer::default())
         .init();
 
     info!("Starting...");
