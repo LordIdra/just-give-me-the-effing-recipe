@@ -7,7 +7,7 @@ use redis::aio::MultiplexedConnection;
 use sqlx::{query, MySql, Pool};
 use tokio::time::interval;
 
-#[tracing::instrument(skip(redis_links, redis_recipes, mysql))]
+#[tracing::instrument(skip_all, name = "Update statistics")]
 async fn update(
     redis_links: MultiplexedConnection, 
     redis_recipes: MultiplexedConnection, 

@@ -8,6 +8,7 @@ use reqwest::StatusCode;
 use sqlx::mysql::MySqlPoolOptions;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{layer::SubscriberExt};
+#[cfg(feature = "profiling")]
 use tracing_tracy::TracyLayer;
 
 mod link;
@@ -36,6 +37,7 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
+    #[cfg(feature = "profiling")]
     tracing_subscriber::registry()
         .with(TracyLayer::default())
         .init();
