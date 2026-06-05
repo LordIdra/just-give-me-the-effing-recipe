@@ -187,7 +187,7 @@ pub async fn run(
     info!("Started processor");
 
     let client = ClientBuilder::new().build().unwrap();
-    let semaphore = Arc::new(Semaphore::new(8192));
+    let semaphore = Arc::new(Semaphore::new(2048));
     let mut interval = interval(Duration::from_millis(500));
 
     loop {
