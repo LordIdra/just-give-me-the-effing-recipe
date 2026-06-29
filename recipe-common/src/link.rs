@@ -267,6 +267,7 @@ pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize
     let next_domains: Vec<String> = redis::cmd("SSCAN")
         .arg(key_waiting_domains())
         .arg(0)
+        .arg("*")
         .arg(count).query_async(&mut redis_links).await?;
     let next_domains_size = next_domains.len();
 
