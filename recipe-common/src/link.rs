@@ -265,8 +265,10 @@ async fn exists(mut redis_links: MultiplexedConnection, link: &str) -> Result<bo
 #[tracing::instrument(skip_all)]
 pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize) -> Result<Vec<String>, Error> {
     let next_domains: Vec<String> = redis::cmd("SRANDMEMBERS")
+        .arg(key_waiting_domains())
         .arg(count)
-        .query_async(&mut redis_links).await?;
+        .query_async(&mut redis_links)
+        .await?;
     let next_domains_size = next_domains.len();
 
     trace!("{next_domains_size} domains available for next jobs");
