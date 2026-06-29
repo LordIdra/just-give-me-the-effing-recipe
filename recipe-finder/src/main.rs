@@ -6,6 +6,7 @@ use clap::Parser;
 use log::info;
 use reqwest::StatusCode;
 use sqlx::mysql::MySqlPoolOptions;
+use tracing_subscriber::{EnvFilter, Layer};
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{layer::SubscriberExt};
 #[cfg(feature = "profiling")]
@@ -37,10 +38,17 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
+    let fmt_layer = tracing_subscriber::fmt::layer()
+        .with_line_number(true)
+        .with_filter(EnvFilter::new("recipe_finder=trace,recipe_common=trace"));
+
+    let subscriber = tracing_subscriber::registry()
+        .with(fmt_layer);
+
     #[cfg(feature = "profiling")]
-    tracing_subscriber::registry()
-        .with(TracyLayer::default())
-        .init();
+    let subscriber = subscriber.with(TracyLayer::default());
+
+    subscriber.init();
 
     info!("Starting...");
 
