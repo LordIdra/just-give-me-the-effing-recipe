@@ -203,7 +203,11 @@ pub async fn run(
             continue;
         }
 
+        let links_result_size = links_result.unwrap().len();
+        trace!("Polled {links_result_size} links for next jobs");
+
         for link in links_result.unwrap() {
+        trace!("Spawned task for {link}");
             tokio::spawn(process(redis_links.clone(), redis_recipes.clone(), client.clone(), semaphore.clone(), link));
         }
     }
