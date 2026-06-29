@@ -1,6 +1,7 @@
 use std::fmt;
 
 use anyhow::Error;
+use log::trace;
 use redis::{aio::MultiplexedConnection, AsyncCommands};
 use serde::{Deserialize, Serialize};
 use tokio::task::JoinSet;
@@ -263,6 +264,9 @@ async fn exists(mut redis_links: MultiplexedConnection, link: &str) -> Result<bo
 #[tracing::instrument(skip_all)]
 pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize) -> Result<Vec<String>, Error> {
     let next_domains: Vec<String> = redis::cmd("SPOP").arg(key_waiting_domains()).arg(count).query_async(&mut redis_links).await?;
+    let next_domains_size = next_domains.len();
+
+    trace!("{next_domains_size} domains available for next jobs");
 
     let mut futures = JoinSet::new();
     for domain in next_domains {
