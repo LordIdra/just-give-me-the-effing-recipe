@@ -245,6 +245,7 @@ pub async fn update_status(mut redis_links: MultiplexedConnection, link: &str, s
     }
 
     if previous_status == LinkStatus::Processing {
+        assert!(status != LinkStatus::Processing);
         pipe.srem(key_processing_domains(), domain.clone());
         if is_domain_waiting(redis_links.clone(), &domain).await? {
             pipe.sadd(key_waiting_domains(), domain.clone());
@@ -263,7 +264,7 @@ async fn exists(mut redis_links: MultiplexedConnection, link: &str) -> Result<bo
 
 #[tracing::instrument(skip_all)]
 pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize) -> Result<Vec<String>, Error> {
-    let next_domains: Vec<String> = redis::cmd("SPOP").arg(key_waiting_domains()).arg(count).query_async(&mut redis_links).await?;
+    let next_domains: Vec<String> = redis::cmd("SMEMBERS").arg(key_waiting_domains()).arg(count).query_async(&mut redis_links).await?;
     let next_domains_size = next_domains.len();
 
     trace!("{next_domains_size} domains available for next jobs");
