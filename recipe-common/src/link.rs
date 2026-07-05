@@ -6,6 +6,7 @@ use redis::{aio::MultiplexedConnection, AsyncCommands};
 use serde::{Deserialize, Serialize};
 use tokio::task::JoinSet;
 use url::Url;
+use utoipa::ToSchema;
 
 use crate::link_blacklist;
 
@@ -118,8 +119,15 @@ pub async fn reset_tasks(mut pool: MultiplexedConnection) -> Result<(), Error> {
     Ok(())
 }
 
-/// Returns true if added
-/// Returns false if already existed or matches the blacklist
+#[derive(Debug, Serialize, ToSchema)]
+pub enum LinkAddResult {
+    Added(String),
+    AlreadyExists,
+    Blacklisted,
+}
+
+/// Returns the amended link if added
+/// Returns none if already existed or matches the blacklist
 #[tracing::instrument(skip_all)]
 pub async fn add(
     mut pool: MultiplexedConnection,
@@ -127,26 +135,37 @@ pub async fn add(
     parent: Option<&str>,
     priority: f32,
     remaining_follows: i32,
-) -> Result<bool, Error> {
+) -> Result<LinkAddResult, Error> {
     if !link_blacklist::is_allowed(pool.clone(), link).await? || exists(pool.clone(), link).await? {
-        return Ok(false);
+        return Ok(LinkAddResult::Blacklisted);
     }
 
-    let url = Url::parse(link)?;
+    let mut link = link.to_string();
+    if link.starts_with("http://") {
+        link = link.strip_prefix("http://").unwrap().to_string();
+    }
+    if link.starts_with("https://") {
+        link = link.strip_prefix("https://").unwrap().to_string();
+    }
+    if link.starts_with("www.") {
+        link = link.strip_prefix("www.").unwrap().to_string();
+    }
+
+    let url = Url::parse(&link)?;
     let Some(domain) = url.domain().map(|domain| domain.to_owned()) else {
         return Err(LinkMissingDomainError { link: link.to_owned() }.into())
     };
 
     let mut pipe = redis::pipe();
-    pipe.zadd(key_status_to_links(LinkStatus::Waiting), link, priority)
-        .hset(key_link_to_status(), link, LinkStatus::Waiting.to_string())
-        .hset(key_link_to_priority(), link, priority)
-        .hset(key_link_to_domain(), link, &domain)
-        .hset(key_link_to_remaining_follows(), link, remaining_follows)
-        .zadd(key_domain_to_waiting_links(&domain), link, priority);
+    pipe.zadd(key_status_to_links(LinkStatus::Waiting), &link, priority)
+        .hset(key_link_to_status(), &link, LinkStatus::Waiting.to_string())
+        .hset(key_link_to_priority(), &link, priority)
+        .hset(key_link_to_domain(), &link, &domain)
+        .hset(key_link_to_remaining_follows(), &link, remaining_follows)
+        .zadd(key_domain_to_waiting_links(&domain), &link, priority);
 
     if let Some(parent) = parent {
-        pipe.hset(key_link_to_parent(), link, parent);
+        pipe.hset(key_link_to_parent(), &link, parent);
     }
 
     pipe.exec_async(&mut pool).await?;
@@ -155,7 +174,7 @@ pub async fn add(
         let _: () = pool.sadd(key_waiting_domains(), &domain).await?;
     }
 
-    Ok(true)
+    Ok(LinkAddResult::Added(link.to_string()))
 }
 
 #[tracing::instrument(skip_all)]

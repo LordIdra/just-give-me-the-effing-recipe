@@ -1,5 +1,5 @@
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use recipe_common::link::{self};
+use recipe_common::link::{self, LinkAddResult};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -27,7 +27,7 @@ pub struct SubmitLinkRequest {
 
 #[derive(Debug, Serialize, ToSchema)]
 struct SubmitLinkSuccessResponse {
-    added: bool,
+    added: LinkAddResult,
 }
 
 #[derive(Debug, Serialize, ToSchema)]

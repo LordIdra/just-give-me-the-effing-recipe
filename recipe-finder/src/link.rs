@@ -1,8 +1,8 @@
 use std::{sync::Arc, time::Duration};
 
 use anyhow::Error;
-use log::{debug, error, info, trace, warn};
-use recipe_common::{link::{self, LinkMissingDomainError, LinkStatus}, recipe::{self, Recipe}};
+use log::{debug, info, trace, warn};
+use recipe_common::{link::{self, LinkAddResult, LinkMissingDomainError, LinkStatus}, recipe::{self, Recipe}};
 use redis::{aio::MultiplexedConnection};
 use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
@@ -115,7 +115,7 @@ pub async fn process_follow(
             remaining_follows - 1
         };
         let added = match link::add(redis_links.clone(), new_link, Some(&link), new_priority, new_remaining_follows).await {
-            Ok(ok) => ok,
+            Ok(ok) => matches!(ok, LinkAddResult::Added(_)),
             // don't return if the link is missing a domain
             Err(err) => match err.downcast_ref::<LinkMissingDomainError>() {
                 Some(_) => false,
