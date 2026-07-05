@@ -1,7 +1,7 @@
 use std::fmt;
 
 use anyhow::Error;
-use log::trace;
+use log::{error, trace};
 use redis::{aio::MultiplexedConnection, AsyncCommands};
 use serde::{Deserialize, Serialize};
 use tokio::task::JoinSet;
@@ -50,7 +50,7 @@ impl LinkStatus {
             "processing" => Some(LinkStatus::Processing),
             "download_failed" => Some(LinkStatus::DownloadFailed),
             "extraction_failed" => Some(LinkStatus::ExtractionFailed),
-            "parsing_failed" => Some(LinkStatus::ExtractionFailed),
+            "parsing_failed" => Some(LinkStatus::ParsingFailed),
             "processed" => Some(LinkStatus::Processed),
             _ => None,
         }
@@ -280,13 +280,22 @@ pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize
             redis_links.clone().zpopmax::<_, Vec<String>>(key_domain_to_waiting_links(&domain), 1).await
         });
     }
-    let next_links: Vec<String> = futures.join_all()
-        .await
-        .into_iter()
-        .collect::<Result<Vec<Vec<String>>, _>>()?
-        .into_iter()
-        .filter_map(|entry| entry.first().cloned())
-        .collect();
+
+    let mut next_links = vec![];
+    for result in futures.join_all().await {
+        match result {
+            Ok(mut link) => next_links.push(link.remove(0)),
+            Err(err) => error!("{err}"),
+        }
+    }
+
+    //let next_links: Vec<String> = futures.join_all()
+    //    .await
+    //    .into_iter()
+    //    .collect::<Result<Vec<Vec<String>>, _>>()?
+    //    .into_iter()
+    //    .filter_map(|entry| entry.first().cloned())
+    //    .collect();
 
     let mut futures = JoinSet::new();
     for link in next_links.clone() {
