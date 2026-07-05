@@ -142,7 +142,8 @@ pub async fn add(
         .hset(key_link_to_status(), link, LinkStatus::Waiting.to_string())
         .hset(key_link_to_priority(), link, priority)
         .hset(key_link_to_domain(), link, &domain)
-        .hset(key_link_to_remaining_follows(), link, remaining_follows);
+        .hset(key_link_to_remaining_follows(), link, remaining_follows)
+        .zadd(key_domain_to_waiting_links(&domain), link, priority);
 
     if let Some(parent) = parent {
         pipe.hset(key_link_to_parent(), link, parent);
@@ -150,9 +151,9 @@ pub async fn add(
 
     pipe.exec_async(&mut pool).await?;
     let is_domain_processing: bool = pool.sismember(key_processing_domains(), &domain).await?;
+    trace!("{domain} processing: {is_domain_processing}");
     if !is_domain_processing {
         let _: () = pool.sadd(key_waiting_domains(), &domain).await?;
-        let _: () = pool.zadd(key_domain_to_waiting_links(&domain), link, priority).await?;
     }
 
     Ok(true)
@@ -257,7 +258,7 @@ pub async fn update_status(mut redis_links: MultiplexedConnection, link: &str, s
         }
     }
 
-    pipe.exec_async(&mut redis_links).await.unwrap();
+    pipe.exec_async(&mut redis_links).await?;
 
     Ok(())
 }
