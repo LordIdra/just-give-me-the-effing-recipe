@@ -15,7 +15,7 @@ NUM_WORKERS = cpu_count() * 2  # Use all CPU cores
 
 # --- Connect to Redis and Elasticsearch ---
 r = redis.Redis(host=REDIS_HOST, port=6382, db=0)
-es = Elasticsearch([ES_HOST])
+es = Elasticsearch([ES_HOST], basic_auth=('elastic', 'password todo'))
 
 # --- Define fields to fetch ---
 STRING_FIELDS = [
