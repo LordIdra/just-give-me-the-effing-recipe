@@ -1,3 +1,5 @@
+# Looks through all domains in waiting_links_by_domain:* and adds every domain to link:waiting_domains
+
 import redis
 
 r = redis.Redis(
@@ -6,4 +8,7 @@ r = redis.Redis(
     db=0,
 )
 
-links = 
+links = r.scan_iter("link:waiting_links_by_domain:*")
+for link in links:
+    print(links.removeprefix("link:waiting_links_by_domain:"))
+
