@@ -205,7 +205,7 @@ pub async fn total_content_size(mut redis_links: MultiplexedConnection) -> Resul
 }
 
 #[tracing::instrument(skip_all)]
-pub async fn is_domain_waiting(mut redis_links: MultiplexedConnection, domain: &str) -> Result<bool, Error> {
+pub async fn domain_has_waiting_links(mut redis_links: MultiplexedConnection, domain: &str) -> Result<bool, Error> {
     Ok(redis_links.exists(key_domain_to_waiting_links(domain)).await?)
 }
 
