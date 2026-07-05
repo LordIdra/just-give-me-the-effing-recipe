@@ -142,8 +142,7 @@ pub async fn add(
         .hset(key_link_to_status(), link, LinkStatus::Waiting.to_string())
         .hset(key_link_to_priority(), link, priority)
         .hset(key_link_to_domain(), link, &domain)
-        .hset(key_link_to_remaining_follows(), link, remaining_follows)
-        .sadd(key_waiting_domains(), &domain);
+        .hset(key_link_to_remaining_follows(), link, remaining_follows);
 
     if let Some(parent) = parent {
         pipe.hset(key_link_to_parent(), link, parent);
@@ -152,6 +151,7 @@ pub async fn add(
     pipe.exec_async(&mut pool).await?;
     let is_domain_processing: bool = pool.sismember(key_processing_domains(), &domain).await?;
     if !is_domain_processing {
+        let _: () = pool.sadd(key_waiting_domains(), &domain).await?;
         let _: () = pool.zadd(key_domain_to_waiting_links(&domain), link, priority).await?;
     }
 
@@ -288,29 +288,13 @@ pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize
     }
 
     let mut next_links = vec![];
-    let mut domains_without_links = vec![];
     for result in futures.join_all().await {
         let domain = result.0;
         let mut link_from_domain = result.1?;
-        if link_from_domain.is_empty() {
-            domains_without_links.push(domain);
-        } else {
+        if !link_from_domain.is_empty() {
             next_links.push((domain, link_from_domain.remove(0)));
         }
     }
-
-    // Remove domains which have no links left
-    let mut futures = JoinSet::new();
-    for domain in domains_without_links {
-        let redis_links = redis_links.clone();
-        futures.spawn(async move {
-            redis_links.clone().srem(key_waiting_domains(), domain).await
-        });
-    }
-    futures.join_all()
-        .await
-        .into_iter()
-        .collect::<Result<(), _>>()?;
 
     // Update status of polled links to processing
     let mut futures = JoinSet::new();

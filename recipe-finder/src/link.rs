@@ -3,7 +3,7 @@ use std::{sync::Arc, time::Duration};
 use anyhow::Error;
 use log::{debug, error, info, trace, warn};
 use recipe_common::{link::{self, LinkMissingDomainError, LinkStatus}, recipe::{self, Recipe}};
-use redis::{AsyncCommands, aio::MultiplexedConnection};
+use redis::{aio::MultiplexedConnection};
 use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
 use tokio::{sync::Semaphore, time::interval};
@@ -184,7 +184,7 @@ pub async fn process(
     }
 }
 
-#[tracing::instrument(skip_all, name = "Process link and re-add domain")]
+#[tracing::instrument(skip_all, name = "Process/re-add")]
 pub async fn process_and_readd_domain(
     redis_links: MultiplexedConnection, 
     redis_recipes: MultiplexedConnection, 
