@@ -1,7 +1,7 @@
 use std::fmt;
 
 use anyhow::Error;
-use log::{error, trace};
+use log::trace;
 use redis::{aio::MultiplexedConnection, AsyncCommands};
 use serde::{Deserialize, Serialize};
 use tokio::task::JoinSet;
@@ -264,39 +264,50 @@ async fn exists(mut redis_links: MultiplexedConnection, link: &str) -> Result<bo
 
 #[tracing::instrument(skip_all)]
 pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize) -> Result<Vec<String>, Error> {
+    // Poll up to `count` next domains
     let next_domains: Vec<String> = redis::cmd("SRANDMEMBER")
         .arg(key_waiting_domains())
         .arg(count)
         .query_async(&mut redis_links)
         .await?;
     let next_domains_size = next_domains.len();
-
     trace!("{next_domains_size} domains available for next jobs");
 
+    // Get 1 waiting link for each domain in parallel
     let mut futures = JoinSet::new();
     for domain in next_domains {
         let redis_links = redis_links.clone();
         futures.spawn(async move {
-            redis_links.clone().zpopmax::<_, Vec<String>>(key_domain_to_waiting_links(&domain), 1).await
+            (domain.clone(), redis_links.clone().zpopmax::<_, Vec<String>>(key_domain_to_waiting_links(&domain), 1).await)
         });
     }
 
     let mut next_links = vec![];
+    let mut domains_without_links = vec![];
     for result in futures.join_all().await {
-        match result {
-            Ok(mut link) => next_links.push(link.remove(0)),
-            Err(err) => error!("{err}"),
+        let domain = result.0;
+        let mut link_from_domain = result.1?;
+        if link_from_domain.is_empty() {
+            domains_without_links.push(domain);
+        } else {
+            next_links.push(link_from_domain.remove(0));
         }
     }
 
-    //let next_links: Vec<String> = futures.join_all()
-    //    .await
-    //    .into_iter()
-    //    .collect::<Result<Vec<Vec<String>>, _>>()?
-    //    .into_iter()
-    //    .filter_map(|entry| entry.first().cloned())
-    //    .collect();
+    // Remove domains which have no links left
+    let mut futures = JoinSet::new();
+    for domain in domains_without_links {
+        let redis_links = redis_links.clone();
+        futures.spawn(async move {
+            redis_links.clone().srem(key_waiting_domains(), domain).await
+        });
+    }
+    futures.join_all()
+        .await
+        .into_iter()
+        .collect::<Result<(), _>>()?;
 
+    // Update status of polled links to processing
     let mut futures = JoinSet::new();
     for link in next_links.clone() {
         let redis_links = redis_links.clone();
