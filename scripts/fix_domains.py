@@ -8,7 +8,14 @@ r = redis.Redis(
     db=0,
 )
 
-links = r.scan_iter("link:waiting_links_by_domain:*")
-for link in links:
-    print(link.removeprefix("link:waiting_links_by_domain:"))
+keys = []
+cursor = 0
+while True:
+    cursor, batch = r.scan(cursor, match="link:waiting_links_by_domain:*")
+    keys.extend(batch)
+    if cursor == 0:
+        break
+
+for key in keys:
+    print(key.decode('utf-8').removeprefix("link:waiting_links_by_domain:"))
 
