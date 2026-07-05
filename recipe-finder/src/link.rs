@@ -110,7 +110,7 @@ pub async fn process_follow(
     let mut added_links = vec![];
     for new_link in &new_links {
         let new_remaining_follows = if recipe_exists {
-            1
+            2
         } else {
             remaining_follows - 1
         };
