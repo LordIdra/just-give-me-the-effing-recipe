@@ -143,6 +143,7 @@ pub async fn process(
     let _permit = semaphore.acquire().await.unwrap();
 
     // Download
+    trace!("Downloading {link}");
     let downloaded = process_download(redis_links.clone(), client, link.clone()).await;
     if let Err(err) = downloaded {
         debug!("Error downloading {}: {} (source: {:?})", &link, err, err.source());
@@ -151,6 +152,7 @@ pub async fn process(
     let downloaded = downloaded.unwrap();
 
     // Extract
+    trace!("Extracting {link}");
     let extracted = process_extract(redis_links.clone(), downloaded.clone(), link.clone()).await;
     if let Err(err) = extracted  {
         debug!("Error extracting {}: {} (source: {:?})", &link, err, err.source());
@@ -160,6 +162,7 @@ pub async fn process(
 
     // Parse
     // (can't use map due to async closures being unstable)
+    trace!("Parsing {link}");
     let parsed = match extracted {
         Some(extracted) => {
             let parsed = process_parse(redis_links.clone(), redis_recipes, extracted, link.clone()).await;
@@ -173,6 +176,7 @@ pub async fn process(
     };
 
     // Follow
+    trace!("Following {link}");
     let followed = process_follow(redis_links.clone(), downloaded, parsed, link.clone()).await;
     if let Err(err) = followed  {
         debug!("Error following {}: {} (source: {:?})", &link, err, err.source());
