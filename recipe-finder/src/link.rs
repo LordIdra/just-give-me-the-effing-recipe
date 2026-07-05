@@ -153,7 +153,7 @@ pub async fn process(
     // Extract
     let extracted = process_extract(redis_links.clone(), downloaded.clone(), link.clone()).await;
     if let Err(err) = extracted  {
-        warn!("Error extracting {}: {} (source: {:?})", &link, err, err.source());
+        debug!("Error extracting {}: {} (source: {:?})", &link, err, err.source());
         return;
     }
     let extracted = extracted.unwrap();
@@ -164,7 +164,7 @@ pub async fn process(
         Some(extracted) => {
             let parsed = process_parse(redis_links.clone(), redis_recipes, extracted, link.clone()).await;
             if let Err(err) = parsed  {
-                warn!("Error parsing {}: {} (source: {:?})", &link, err, err.source());
+                debug!("Error parsing {}: {} (source: {:?})", &link, err, err.source());
                 return;
             }
             parsed.unwrap()
@@ -175,7 +175,7 @@ pub async fn process(
     // Follow
     let followed = process_follow(redis_links.clone(), downloaded, parsed, link.clone()).await;
     if let Err(err) = followed  {
-        warn!("Error following {}: {} (source: {:?})", &link, err, err.source());
+        debug!("Error following {}: {} (source: {:?})", &link, err, err.source());
         return;
     }
 }
@@ -206,7 +206,7 @@ pub async fn run(
         let links = links_result.unwrap();
 
         let links_result_size = links.len();
-        trace!("Polled {links_result_size} links for next jobs");
+        trace!("Polled {links_result_size} links for next jobs: {links:?}");
 
         for link in links {
         trace!("Spawned task for {link}");
