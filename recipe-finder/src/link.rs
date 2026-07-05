@@ -193,7 +193,7 @@ pub async fn process_and_readd_domain(
     domain: String,
     link: String
 ) {
-    process(redis_links.clone(), redis_recipes, client, semaphore, link);
+    process(redis_links.clone(), redis_recipes, client, semaphore, link).await;
 
     if let Err(err) = link::add_domain_to_waiting_domains(redis_links, &domain).await {
         error!("{err}");
