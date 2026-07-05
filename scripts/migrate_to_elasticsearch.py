@@ -8,7 +8,7 @@ import time
 
 # --- Config ---
 REDIS_HOST = 'localhost'
-ES_HOST = 'http://loalhost:9200'
+ES_HOST = 'http://localhost:9200'
 INDEX_NAME = 'recipes'
 BATCH_SIZE = 1000  # Adjust based on your system
 NUM_WORKERS = cpu_count() * 2  # Use all CPU cores
