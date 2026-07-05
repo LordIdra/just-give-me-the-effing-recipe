@@ -10,5 +10,5 @@ r = redis.Redis(
 
 links = r.scan_iter("link:waiting_links_by_domain:*")
 for link in links:
-    print(links.removeprefix("link:waiting_links_by_domain:"))
+    print(link.removeprefix("link:waiting_links_by_domain:"))
 
