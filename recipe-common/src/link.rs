@@ -257,7 +257,7 @@ pub async fn update_status(mut redis_links: MultiplexedConnection, link: &str, s
         }
     }
 
-    pipe.exec_async(&mut redis_links).await?;
+    pipe.exec_async(&mut redis_links).await.unwrap();
 
     Ok(())
 }
