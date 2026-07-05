@@ -159,6 +159,11 @@ pub async fn add(
 }
 
 #[tracing::instrument(skip_all)]
+pub async fn add_domain_to_waiting_domains(mut redis_links: MultiplexedConnection, domain: &str) -> Result<(), Error> {
+    Ok(redis_links.sadd(key_waiting_domains(), domain).await?)
+}
+
+#[tracing::instrument(skip_all)]
 pub async fn get_status(mut redis_links: MultiplexedConnection, link: &str) -> Result<LinkStatus, Error> {
     Ok(LinkStatus::from_string(&redis_links.hget::<_, _, String>(key_link_to_status(), link).await?).unwrap())
 }
@@ -263,9 +268,9 @@ async fn exists(mut redis_links: MultiplexedConnection, link: &str) -> Result<bo
 }
 
 #[tracing::instrument(skip_all)]
-pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize) -> Result<Vec<String>, Error> {
+pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize) -> Result<Vec<(String, String)>, Error> {
     // Poll up to `count` next domains
-    let next_domains: Vec<String> = redis::cmd("SRANDMEMBER")
+    let next_domains: Vec<String> = redis::cmd("SPOP")
         .arg(key_waiting_domains())
         .arg(count)
         .query_async(&mut redis_links)
@@ -290,7 +295,7 @@ pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize
         if link_from_domain.is_empty() {
             domains_without_links.push(domain);
         } else {
-            next_links.push(link_from_domain.remove(0));
+            next_links.push((domain, link_from_domain.remove(0)));
         }
     }
 
@@ -312,7 +317,7 @@ pub async fn poll_next_jobs(mut redis_links: MultiplexedConnection, count: usize
     for link in next_links.clone() {
         let redis_links = redis_links.clone();
         futures.spawn(async move {
-            update_status(redis_links.clone(), &link, LinkStatus::Processing).await
+            update_status(redis_links.clone(), &link.1, LinkStatus::Processing).await
         });
     }
     futures.join_all()

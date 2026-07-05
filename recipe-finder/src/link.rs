@@ -1,9 +1,9 @@
 use std::{sync::Arc, time::Duration};
 
 use anyhow::Error;
-use log::{debug, info, trace, warn};
+use log::{debug, error, info, trace, warn};
 use recipe_common::{link::{self, LinkMissingDomainError, LinkStatus}, recipe::{self, Recipe}};
-use redis::aio::MultiplexedConnection;
+use redis::{AsyncCommands, aio::MultiplexedConnection};
 use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
 use tokio::{sync::Semaphore, time::interval};
@@ -184,6 +184,23 @@ pub async fn process(
     }
 }
 
+#[tracing::instrument(skip_all, name = "Process link and re-add domain")]
+pub async fn process_and_readd_domain(
+    redis_links: MultiplexedConnection, 
+    redis_recipes: MultiplexedConnection, 
+    client: Client, 
+    semaphore: Arc<Semaphore>, 
+    domain: String,
+    link: String
+) {
+    process(redis_links.clone(), redis_recipes, client, semaphore, link);
+
+    if let Err(err) = link::add_domain_to_waiting_domains(redis_links, &domain).await {
+        error!("{err}");
+    }
+}
+
+
 pub async fn run(
     redis_links: MultiplexedConnection, 
     redis_recipes: MultiplexedConnection, 
@@ -191,10 +208,10 @@ pub async fn run(
     info!("Started processor");
 
     let client = ClientBuilder::new()
-        .timeout(Duration::from_secs(10))
+        .timeout(Duration::from_secs(20))
         .build()
         .unwrap();
-    let semaphore = Arc::new(Semaphore::new(2048));
+    let semaphore = Arc::new(Semaphore::new(8192));
     let mut interval = interval(Duration::from_millis(500));
 
     loop {
@@ -215,9 +232,9 @@ pub async fn run(
         let links_result_size = links.len();
         trace!("Polled {links_result_size} links for next jobs: {links:?}");
 
-        for link in links {
+        for (domain, link) in links {
         trace!("Spawned task for {link}");
-            tokio::spawn(process(redis_links.clone(), redis_recipes.clone(), client.clone(), semaphore.clone(), link));
+            tokio::spawn(process_and_readd_domain(redis_links.clone(), redis_recipes.clone(), client.clone(), semaphore.clone(), domain, link));
         }
     }
 }
