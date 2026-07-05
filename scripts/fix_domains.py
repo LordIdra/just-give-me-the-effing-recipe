@@ -18,4 +18,4 @@ while True:
 
 for key in keys:
     print(key.decode('utf-8').removeprefix("link:waiting_links_by_domain:"))
-    r.sadd("link:waiting_domains", key)
+    r.sadd("link:waiting_domains", key.decode('utf-8').removeprefix("link:waiting_links_by_domain:"))
