@@ -151,7 +151,6 @@ pub async fn add(
 
     pipe.exec_async(&mut pool).await?;
     let is_domain_processing: bool = pool.sismember(key_processing_domains(), &domain).await?;
-    trace!("{domain} processing: {is_domain_processing}");
     if !is_domain_processing {
         let _: () = pool.sadd(key_waiting_domains(), &domain).await?;
     }
@@ -253,9 +252,6 @@ pub async fn update_status(mut redis_links: MultiplexedConnection, link: &str, s
     if previous_status == LinkStatus::Processing {
         assert!(status != LinkStatus::Processing);
         pipe.srem(key_processing_domains(), domain.clone());
-        if is_domain_waiting(redis_links.clone(), &domain).await? {
-            pipe.sadd(key_waiting_domains(), domain.clone());
-        }
     }
 
     pipe.exec_async(&mut redis_links).await?;
