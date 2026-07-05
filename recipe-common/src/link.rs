@@ -252,6 +252,9 @@ pub async fn update_status(mut redis_links: MultiplexedConnection, link: &str, s
     if previous_status == LinkStatus::Processing {
         assert!(status != LinkStatus::Processing);
         pipe.srem(key_processing_domains(), domain.clone());
+        if domain_has_waiting_links(redis_links.clone(), &domain).await? {
+            pipe.sadd(key_waiting_domains(), domain.clone());
+        }
     }
 
     pipe.exec_async(&mut redis_links).await?;

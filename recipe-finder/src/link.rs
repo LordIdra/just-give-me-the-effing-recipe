@@ -184,23 +184,6 @@ pub async fn process(
     }
 }
 
-#[tracing::instrument(skip_all, name = "Process/re-add")]
-pub async fn process_and_readd_domain(
-    redis_links: MultiplexedConnection, 
-    redis_recipes: MultiplexedConnection, 
-    client: Client, 
-    semaphore: Arc<Semaphore>, 
-    domain: String,
-    link: String
-) {
-    process(redis_links.clone(), redis_recipes, client, semaphore, link).await;
-
-    if let Err(err) = link::add_domain_to_waiting_domains(redis_links, &domain).await {
-        error!("{err}");
-    }
-}
-
-
 pub async fn run(
     redis_links: MultiplexedConnection, 
     redis_recipes: MultiplexedConnection, 
@@ -234,7 +217,7 @@ pub async fn run(
 
         for (domain, link) in links {
         trace!("Spawned task for {link}");
-            tokio::spawn(process_and_readd_domain(redis_links.clone(), redis_recipes.clone(), client.clone(), semaphore.clone(), domain, link));
+            tokio::spawn(process(redis_links.clone(), redis_recipes.clone(), client.clone(), semaphore.clone(), link));
         }
     }
 }
