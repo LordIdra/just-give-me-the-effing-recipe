@@ -5,10 +5,10 @@ from elasticsearch import Elasticsearch, helpers
 import json
 
 # Connect to Redis
-r = redis.Redis(host='your_redis_host', port=6379, db=0)
+r = redis.Redis(host='localhost', port=6371, db=0)
 
 # Connect to Elasticsearch
-es = Elasticsearch(['http://your_elasticsearch_host:9200'])
+es = Elasticsearch(['http://localhost:9200'])
 index_name = 'recipes'
 
 # Get all recipe IDs
