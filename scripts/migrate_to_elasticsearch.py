@@ -14,7 +14,7 @@ BATCH_SIZE = 1000  # Adjust based on your system
 NUM_WORKERS = cpu_count() * 2  # Use all CPU cores
 
 # --- Connect to Redis and Elasticsearch ---
-r = redis.Redis(host=REDIS_HOST, port=6381, db=0)
+r = redis.Redis(host=REDIS_HOST, port=6382, db=0)
 es = Elasticsearch([ES_HOST])
 
 # --- Define fields to fetch ---
