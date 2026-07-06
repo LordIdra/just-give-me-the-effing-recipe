@@ -45,10 +45,41 @@ async function searchRecipes(query: string, page: number = 0, size: number = 20)
             },
             body: JSON.stringify({
                 query: {
-                    multi_match: {
-                        query: query,
-                        fields: ["title", "description", "ingredients", "keywords"],
-                        fuzziness: "AUTO"
+                    bool: {
+                        should: [
+                            {
+                                match: {
+                                    "title": {
+                                        query: query,
+                                        boost: 10.0  // Title has 10x priority
+                                    }
+                                }
+                            },
+                            {
+                                match: {
+                                    "ingredients": {
+                                        query: query,
+                                        boost: 2.0  // Ingredients have 2x priority
+                                    }
+                                }
+                            },
+                            {
+                                match: {
+                                    "keywords": {
+                                        query: query,
+                                        boost: 3.0  // Keywords have 3x priority
+                                    }
+                                }
+                            },
+                            {
+                                match: {
+                                    "description": {
+                                        query: query,
+                                        boost: 1.0  // Description has normal priority
+                                    }
+                                }
+                            }
+                        ]
                     }
                 },
                 from: page * size,
