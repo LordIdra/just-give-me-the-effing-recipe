@@ -169,7 +169,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                                 modifier: "log1p",
                                 missing: 0
                             }
-                        }] : [])
+                        }] : []),
                         score_mode: "sum",
                         boost_mode: "multiply",
                         max_boost: 3
