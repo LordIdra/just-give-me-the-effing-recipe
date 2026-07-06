@@ -5,8 +5,8 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc && cp index.html dist/ && cp styles.css dist/",
-    "dev": "tsc --watch & live-server dist --port=8080",
-    "start": "live-server dist --port=8080",
+    "dev": "tsc --watch & live-server dist --port=80",
+    "start": "live-server dist --port=80",
     "proxy": "node proxy.js",
     "dev:full": "npm run proxy & npm run dev"
   },
