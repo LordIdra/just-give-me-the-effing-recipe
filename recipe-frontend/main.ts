@@ -53,10 +53,19 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                             bool: {
                                 should: [
                                     {
+                                        match_phrase: {
+                                            "title": {
+                                                query: query,
+                                                boost: 15.0,  // Exact phrase match - highest priority
+                                                slop: 2       // Allow 2 words between terms
+                                            }
+                                        }
+                                    },
+                                    {
                                         match: {
                                             "title": {
                                                 query: query,
-                                                boost: 10.0  // Title has 10x priority
+                                                boost: 10.0  // Individual word matches - still important
                                             }
                                         }
                                     },
@@ -142,7 +151,8 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                 size: size,
                 sort: state.sortField 
                     ? [{ [state.sortField]: { order: state.sortOrder || "asc", missing: "_last" } }]
-                    : [{ _score: { order: "desc" } }]
+                    : [{ _score: { order: "desc" } }],
+                track_total_hits: true
             })
         });
         
