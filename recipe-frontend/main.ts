@@ -206,15 +206,19 @@ function handleScroll() {
     }
 }
 
-// Handle nutrition sorting
-function handleNutritionSort(fieldName: string) {
-    if (state.sortField === fieldName) {
-        // Toggle sort order if same field
-        state.sortOrder = state.sortOrder === 'asc' ? 'desc' : 'asc';
+// Handle sort dropdown change
+function handleSortChange() {
+    const selectElement = document.getElementById('sort-select') as HTMLSelectElement;
+    const value = selectElement.value;
+    
+    if (value === '') {
+        // No sorting - use relevance
+        state.sortField = null;
+        state.sortOrder = null;
     } else {
-        // New field - default to ascending
-        state.sortField = fieldName;
-        state.sortOrder = 'asc';
+        const [field, order] = value.split('_');
+        state.sortField = field;
+        state.sortOrder = order as 'asc' | 'desc';
     }
     
     // Reset to first page when sorting changes
@@ -250,8 +254,8 @@ function init() {
     renderResults();
     initEventListeners();
     
-    // Expose sort function globally for HTML onclick
-    (window as any).handleNutritionSort = handleNutritionSort;
+    // Expose sort function globally for HTML onchange
+    (window as any).handleSortChange = handleSortChange;
 }
 
 // Start the app when DOM is loaded

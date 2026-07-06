@@ -64,6 +64,33 @@ header p {
     border-color: var(--accent-color);
 }
 
+.sort-container {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sort-container label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+#sort-select {
+    padding: 0.5rem;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+#sort-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
 #search-status {
     margin-top: 0.5rem;
     font-size: 0.9rem;
