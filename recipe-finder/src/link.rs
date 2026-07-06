@@ -90,7 +90,7 @@ pub async fn process_follow(
 
     // Remaining follows
     let remaining_follows = link::get_remaining_follows(redis_links.clone(), &link).await?;
-    if remaining_follows <= 0 && !recipe_is_complete {
+    if remaining_follows <= 0 && !recipe_exists {
         trace!("Terminated follow for {link}");
         return Ok(())
     }
