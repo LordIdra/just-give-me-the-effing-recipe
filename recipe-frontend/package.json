@@ -11,8 +11,8 @@
     "dev:full": "npm run proxy & npm run dev"
   },
   "dependencies": {
+    "cors": "^2.8.6",
     "express": "^4.22.2",
-    "express-basic-auth": "^1.2.1",
     "http-proxy-middleware": "^2.0.10",
     "live-server": "^1.2.2"
   },

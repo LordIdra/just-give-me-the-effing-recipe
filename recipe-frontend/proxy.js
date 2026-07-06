@@ -1,15 +1,15 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
-const basicAuth = require('express-basic-auth');
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Basic Auth for the proxy itself (optional but recommended)
-app.use(basicAuth({
-    users: { 'proxy': process.env.PROXY_PASSWORD || 'change-this-in-production' },
-    challenge: true,
-    realm: 'Recipe Proxy'
+// Enable CORS for development
+app.use(cors({
+    origin: '*', // Restrict this in production
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Proxy to ElasticSearch with Basic Auth

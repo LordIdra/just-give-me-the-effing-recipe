@@ -34,7 +34,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 20)
         await new Promise(resolve => setTimeout(resolve, 300));
                
         const response = await fetch(ELASTICSEARCH_ENDPOINT, {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
