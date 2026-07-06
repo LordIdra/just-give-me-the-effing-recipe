@@ -142,11 +142,6 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                                 weight: 1
                             }
                         ],
-                        // Use a simple boost based on sort field presence and value
-                        ...(state.sortField ? [{
-                            filter: { exists: { field: state.sortField } },
-                            weight: 20  // Strong boost for having the field
-                        }] : []),
                         score_mode: "sum",
                         boost_mode: "multiply",
                         max_boost: 3
@@ -155,10 +150,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                 from: page * size,
                 size: size,
                 sort: state.sortField 
-                    ? [
-                        { _score: { order: "desc" } },  // Primary sort by relevance
-                        { [state.sortField]: { order: state.sortOrder || "asc", missing: "_last" } }  // Secondary sort by field
-                      ]
+                    ? [{ [state.sortField]: { order: state.sortOrder || "asc", missing: "_last" } }]
                     : [{ _score: { order: "desc" } }],
                 track_total_hits: true
             })
