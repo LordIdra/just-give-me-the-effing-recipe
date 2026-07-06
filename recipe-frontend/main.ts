@@ -159,17 +159,17 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                             {
                                 filter: { exists: { field: "sugar" } },
                                 weight: 1
-                            }
+                            },
+                            // Add weighted sorting using field_value_factor
+                            ...(state.sortField ? [{
+                                field_value_factor: {
+                                    field: state.sortField,
+                                    factor: 100.0,
+                                    modifier: "log1p",
+                                    missing: 0
+                                }
+                            }] : [])
                         ],
-                        // Add weighted sorting using field_value_factor
-                        ...(state.sortField ? [{
-                            field_value_factor: {
-                                field: state.sortField,
-                                factor: 100.0,
-                                modifier: "log1p",
-                                missing: 0
-                            }
-                        }] : []),
                         score_mode: "sum",
                         boost_mode: "multiply",
                         max_boost: 3
