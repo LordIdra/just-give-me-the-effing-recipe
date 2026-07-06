@@ -48,49 +48,94 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
             },
             body: JSON.stringify({
                 query: {
-                    bool: {
-                        should: [
-                            {
-                                match: {
-                                    "title": {
-                                        query: query,
-                                        boost: 10.0  // Title has 10x priority
+                    function_score: {
+                        query: {
+                            bool: {
+                                should: [
+                                    {
+                                        match: {
+                                            "title": {
+                                                query: query,
+                                                boost: 10.0  // Title has 10x priority
+                                            }
+                                        }
+                                    },
+                                    {
+                                        match: {
+                                            "ingredients": {
+                                                query: query,
+                                                boost: 2.0  // Ingredients have 2x priority
+                                            }
+                                        }
+                                    },
+                                    {
+                                        match: {
+                                            "keywords": {
+                                                query: query,
+                                                boost: 3.0  // Keywords have 3x priority
+                                            }
+                                        }
+                                    },
+                                    {
+                                        match: {
+                                            "authors": {
+                                                query: query,
+                                                boost: 0.3  // Author has 0.3x priority
+                                            }
+                                        }
+                                    },
+                                    {
+                                        match: {
+                                            "description": {
+                                                query: query,
+                                                boost: 1.0  // Description has normal priority
+                                            }
+                                        }
                                     }
-                                }
-                            },
-                            {
-                                match: {
-                                    "ingredients": {
-                                        query: query,
-                                        boost: 2.0  // Ingredients have 2x priority
-                                    }
-                                }
-                            },
-                            {
-                                match: {
-                                    "keywords": {
-                                        query: query,
-                                        boost: 3.0  // Keywords have 3x priority
-                                    }
-                                }
-                            },
-                            {
-                                match: {
-                                    "authors": {
-                                        query: query,
-                                        boost: 0.3  // Author has 0.3x priority
-                                    }
-                                }
-                            },
-                            {
-                                match: {
-                                    "description": {
-                                        query: query,
-                                        boost: 1.0  // Description has normal priority
-                                    }
-                                }
+                                ]
                             }
-                        ]
+                        },
+                        functions: [
+                            {
+                                filter: { exists: { field: "calories" } },
+                                weight: 2
+                            },
+                            {
+                                filter: { exists: { field: "protein" } },
+                                weight: 2
+                            },
+                            {
+                                filter: { exists: { field: "carbohydrates" } },
+                                weight: 2
+                            },
+                            {
+                                filter: { exists: { field: "fat" } },
+                                weight: 2
+                            },
+                            {
+                                filter: { exists: { field: "saturated_fat" } },
+                                weight: 1
+                            },
+                            {
+                                filter: { exists: { field: "cholesterol" } },
+                                weight: 1
+                            },
+                            {
+                                filter: { exists: { field: "fiber" } },
+                                weight: 1
+                            },
+                            {
+                                filter: { exists: { field: "sodium" } },
+                                weight: 1
+                            },
+                            {
+                                filter: { exists: { field: "sugar" } },
+                                weight: 1
+                            }
+                        ],
+                        score_mode: "sum",
+                        boost_mode: "multiply",
+                        max_boost: 3
                     }
                 },
                 from: page * size,
@@ -256,6 +301,8 @@ function handleSortFieldChange() {
     state.page = 0;
     performSearch();
 }
+
+
 
 // Handle sort direction toggle
 function handleSortDirectionToggle() {
