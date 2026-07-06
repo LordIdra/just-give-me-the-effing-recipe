@@ -144,7 +144,7 @@ function renderResults() {
         return;
     }
 
-    resultsContainer.innerHTML = state.results.map(createRecipeCard).join('');
+    resultsContainer.innerHTML = state.results.map(recipe => createRecipeCard(recipe, state.sortField, state.sortOrder)).join('');
 }
 
 // Perform search
@@ -251,7 +251,7 @@ function init() {
     initEventListeners();
     
     // Expose sort function globally for HTML onclick
-    window.handleNutritionSort = handleNutritionSort;
+    (window as any).handleNutritionSort = handleNutritionSort;
 }
 
 // Start the app when DOM is loaded

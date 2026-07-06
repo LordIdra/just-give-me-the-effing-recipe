@@ -52,7 +52,7 @@ export function isInViewport(el: HTMLElement): boolean {
 }
 
 // Create recipe card HTML
-export function createRecipeCard(recipe: any): string {
+export function createRecipeCard(recipe: any, currentSortField: string | null = null, currentSortOrder: 'asc' | 'desc' | null = null): string {
     const prepTime = formatTime(recipe.prep_time_seconds);
     const cookTime = formatTime(recipe.cook_time_seconds);
     const totalTime = formatTime(recipe.total_time_seconds);
@@ -78,7 +78,7 @@ export function createRecipeCard(recipe: any): string {
             <div class="nutrition-grid">
                 ${nutritionData.map(n => {
                     const fieldName = n.label.toLowerCase().replace(' ', '_');
-                    const sortClass = state.sortField === fieldName ? `sorted-${state.sortOrder}` : '';
+                    const sortClass = currentSortField === fieldName ? `sorted-${currentSortOrder}` : '';
                     return `<div class="nutrition-item ${n.value === 'N/A' ? 'na-item' : ''}" 
                              onclick="handleNutritionSort('${fieldName}')">
                                 <strong class="nutrition-label ${sortClass}">${n.label}</strong>
