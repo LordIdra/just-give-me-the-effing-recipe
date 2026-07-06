@@ -14,18 +14,18 @@
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Search for recipes..." autocomplete="off">
             <div class="sort-container">
-                <label for="sort-select">Sort by:</label>
-                <select id="sort-select" onchange="handleSortChange()">
+                <label for="sort-field">Sort by:</label>
+                <select id="sort-field" onchange="handleSortFieldChange()">
                     <option value="">None (Relevance)</option>
-                    <option value="calories_asc">Calories (Low to High)</option>
-                    <option value="calories_desc">Calories (High to Low)</option>
-                    <option value="protein_asc">Protein (Low to High)</option>
-                    <option value="protein_desc">Protein (High to Low)</option>
-                    <option value="carbohydrates_asc">Carbs (Low to High)</option>
-                    <option value="carbohydrates_desc">Carbs (High to Low)</option>
-                    <option value="fat_asc">Fat (Low to High)</option>
-                    <option value="fat_desc">Fat (High to Low)</option>
+                    <option value="calories">Calories</option>
+                    <option value="protein">Protein</option>
+                    <option value="carbohydrates">Carbs</option>
+                    <option value="fat">Fat</option>
+                    <option value="total_time_seconds">Total Time</option>
                 </select>
+                <button id="sort-direction" onclick="handleSortDirectionToggle()" style="display: none;">
+                    ↓ Descending
+                </button>
             </div>
             <div id="search-status"></div>
         </div>

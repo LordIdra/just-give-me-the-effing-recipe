@@ -57,4 +57,5 @@ export interface AppState {
     hasMore: boolean;
     sortField: string | null;
     sortOrder: 'asc' | 'desc' | null;
+    totalResults: number | null;
 }

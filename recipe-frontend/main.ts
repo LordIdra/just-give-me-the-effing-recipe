@@ -10,7 +10,8 @@ const state: AppState = {
     page: 0,
     hasMore: true,
     sortField: null,
-    sortOrder: null
+    sortOrder: null,
+    totalResults: null
 };
 
 // DOM elements
@@ -75,6 +76,14 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                             },
                             {
                                 match: {
+                                    "authors": {
+                                        query: query,
+                                        boost: 0.3  // Author has 0.3x priority
+                                    }
+                                }
+                            },
+                            {
+                                match: {
                                     "description": {
                                         query: query,
                                         boost: 1.0  // Description has normal priority
@@ -108,6 +117,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
         }
         
         const data: ElasticSearchResponse = await response.json();
+        state.totalResults = data.hits.total.value;
         return data.hits.hits.map(hit => hit._source);
         
     } catch (error) {
@@ -135,7 +145,11 @@ function updateUI() {
 
     // Update search status
     if (state.query) {
-        searchStatus.textContent = `${state.results.length} results found`;
+        if (state.totalResults !== null) {
+            searchStatus.textContent = `${state.totalResults.toLocaleString()} total results (showing ${state.results.length})`;
+        } else {
+            searchStatus.textContent = `${state.results.length} results found`;
+        }
     } else {
         searchStatus.textContent = '';
     }
@@ -200,6 +214,7 @@ async function performSearch() {
 // Debounced search
 const debouncedSearch = debounce(() => {
     state.page = 0;
+    state.totalResults = null; // Reset total when query changes
     performSearch();
 }, 300);
 
@@ -217,19 +232,43 @@ function handleScroll() {
     }
 }
 
-// Handle sort dropdown change
-function handleSortChange() {
-    const selectElement = document.getElementById('sort-select') as HTMLSelectElement;
-    const value = selectElement.value;
+// Handle sort field dropdown change
+function handleSortFieldChange() {
+    const selectElement = document.getElementById('sort-field') as HTMLSelectElement;
+    const field = selectElement.value;
+    const directionButton = document.getElementById('sort-direction') as HTMLButtonElement;
     
-    if (value === '') {
+    if (field === '') {
         // No sorting - use relevance
         state.sortField = null;
         state.sortOrder = null;
+        directionButton.style.display = 'none';
     } else {
-        const [field, order] = value.split('_');
+        // New field - default to descending
         state.sortField = field;
-        state.sortOrder = order as 'asc' | 'desc';
+        state.sortOrder = 'desc';
+        directionButton.style.display = 'inline-block';
+        directionButton.className = 'descending';
+        directionButton.textContent = '↓ Descending';
+    }
+    
+    // Reset to first page when sorting changes
+    state.page = 0;
+    performSearch();
+}
+
+// Handle sort direction toggle
+function handleSortDirectionToggle() {
+    const button = document.getElementById('sort-direction') as HTMLButtonElement;
+    
+    if (state.sortOrder === 'desc') {
+        state.sortOrder = 'asc';
+        button.className = 'ascending';
+        button.textContent = '↑ Ascending';
+    } else {
+        state.sortOrder = 'desc';
+        button.className = 'descending';
+        button.textContent = '↓ Descending';
     }
     
     // Reset to first page when sorting changes
@@ -265,8 +304,9 @@ function init() {
     renderResults();
     initEventListeners();
     
-    // Expose sort function globally for HTML onchange
-    (window as any).handleSortChange = handleSortChange;
+    // Expose sort functions globally
+    (window as any).handleSortFieldChange = handleSortFieldChange;
+    (window as any).handleSortDirectionToggle = handleSortDirectionToggle;
 }
 
 // Start the app when DOM is loaded
