@@ -83,7 +83,7 @@ export function createRecipeCard(recipe: any): string {
                 <a href="${recipe.link}" target="_blank" rel="noopener noreferrer" class="recipe-link">View Original Recipe</a>
                 
                 <div class="recipe-meta">
-                    <div class="meta-item">⭐ ${recipe.rating_count || "No"} ratings</div>
+                    <div class="meta-item">⭐ Rating: ${recipe.rating_count || "No rating"}</div>
                     <div class="meta-item">⏱️ Prep: ${prepTime}</div>
                     <div class="meta-item">🍳 Cook: ${cookTime}</div>
                     <div class="meta-item">⏰ Total: ${totalTime}</div>
