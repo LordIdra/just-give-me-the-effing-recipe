@@ -144,9 +144,15 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                         ],
                         // Add sort field as a weighting factor when selected
                         ...(state.sortField ? [{
+                            filter: { exists: { field: state.sortField } },
+                            weight: 10
+                        }] : []),
+                        
+                        // Apply directional weighting based on sort order
+                        ...(state.sortField ? [{
                             field_value_factor: {
                                 field: state.sortField,
-                                factor: state.sortOrder === 'desc' ? 0.5 : -0.5,
+                                factor: state.sortOrder === 'desc' ? 1 : -1,
                                 modifier: 'none',
                                 missing: 0
                             }
