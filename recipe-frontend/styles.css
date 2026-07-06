@@ -206,7 +206,7 @@ main {
 
 .nutrition-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 0.5rem;
 }
 
@@ -224,10 +224,13 @@ main {
     color: var(--accent-color);
 }
 
-.nutrition-item .na-value {
-    color: var(--text-secondary);
+.nutrition-item.na-item {
+    background-color: rgba(255, 107, 107, 0.05);
+    opacity: 0.6;
+}
+
+.nutrition-item.na-item strong {
     opacity: 0.7;
-    font-style: italic;
 }
 
 .loading {

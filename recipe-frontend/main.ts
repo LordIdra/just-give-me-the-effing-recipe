@@ -23,7 +23,7 @@ const searchStatus = document.getElementById('search-status') as HTMLElement;
 // For development: using mock data below
 
 // Search ElasticSearch
-async function searchRecipes(query: string, page: number = 0, size: number = 20): Promise<Recipe[]> {
+async function searchRecipes(query: string, page: number = 0, size: number = 18): Promise<Recipe[]> {
     if (!query.trim()) return [];
 
     try {

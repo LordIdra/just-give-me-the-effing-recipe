@@ -76,7 +76,7 @@ export function createRecipeCard(recipe: any): string {
         ? `<div class="recipe-section">
             <h3>Nutrition</h3>
             <div class="nutrition-grid">
-                ${nutritionData.map(n => `<div class="nutrition-item"><strong>${n.label}</strong><span class="${n.value === 'N/A' ? 'na-value' : ''}">${n.value}</span></div>`).join("")}
+                ${nutritionData.map(n => `<div class="nutrition-item ${n.value === 'N/A' ? 'na-item' : ''}"><strong>${n.label}</strong>${n.value}</div>`).join("")}
             </div>
           </div>`
         : "";
