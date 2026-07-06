@@ -30,7 +30,7 @@ pub async fn is_allowed(mut pool: MultiplexedConnection, link: &str) -> Result<b
 
     for word in blacklist {
         if link.contains(&word) {
-            trace!(word);
+            trace!("{}", word);
             return Ok(false);
         }
     }
