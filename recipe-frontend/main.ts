@@ -18,8 +18,9 @@ const loadingIndicator = document.getElementById('loading-indicator') as HTMLEle
 const errorMessage = document.getElementById('error-message') as HTMLElement;
 const searchStatus = document.getElementById('search-status') as HTMLElement;
 
-// API configuration - proxy endpoint
-const ELASTICSEARCH_ENDPOINT = 'http://142.4.218.188:3001/api/search'; // Proxy handles ElasticSearch auth
+// API configuration
+// For production: const ELASTICSEARCH_ENDPOINT = '/api/search'; // Requires proxy setup
+// For development: using mock data below
 
 // Search ElasticSearch
 async function searchRecipes(query: string, page: number = 0, size: number = 20): Promise<Recipe[]> {
@@ -33,7 +34,11 @@ async function searchRecipes(query: string, page: number = 0, size: number = 20)
         // Simulate API call delay
         await new Promise(resolve => setTimeout(resolve, 300));
                
-        const response = await fetch(ELASTICSEARCH_ENDPOINT, {
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // REAL API CALL - Make sure proxy is running
+        const response = await fetch('/api/search', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

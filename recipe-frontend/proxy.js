@@ -5,6 +5,18 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Simple .env loading - no external dependencies
+const fs = require('fs');
+if (fs.existsSync('.env')) {
+    const envConfig = require('dotenv').config().parsed;
+    for (const key in envConfig) {
+        process.env[key] = envConfig[key];
+    }
+}
+
+console.log('Proxy starting...');
+console.log('ElasticSearch URL:', process.env.ELASTICSEARCH_URL || 'http://localhost:9200');
+
 // Enable CORS for development
 app.use(cors({
     origin: '*', // Restrict this in production
