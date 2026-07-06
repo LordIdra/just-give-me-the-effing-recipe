@@ -127,7 +127,7 @@ pub async fn process_follow(
         }
     }
 
-    trace!("Followed {}/{} links from {}: {:?}", added_links.len(), new_links.len(), link, &added_links);
+    trace!("Followed {}/{} links from {}: {:?} (ORIGINAL: {:?})", added_links.len(), new_links.len(), link, &added_links, &new_links);
 
     Ok(())
 }
