@@ -8,7 +8,9 @@ const state: AppState = {
     loading: false,
     error: null,
     page: 0,
-    hasMore: true
+    hasMore: true,
+    sortField: null,
+    sortOrder: null
 };
 
 // DOM elements
@@ -84,7 +86,9 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                 },
                 from: page * size,
                 size: size,
-                sort: [{ _score: { order: "desc" } }]
+                sort: state.sortField 
+                    ? [{ [state.sortField]: { order: state.sortOrder || "asc" } }]
+                    : [{ _score: { order: "desc" } }]
             })
         });
         
@@ -202,6 +206,22 @@ function handleScroll() {
     }
 }
 
+// Handle nutrition sorting
+function handleNutritionSort(fieldName: string) {
+    if (state.sortField === fieldName) {
+        // Toggle sort order if same field
+        state.sortOrder = state.sortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        // New field - default to ascending
+        state.sortField = fieldName;
+        state.sortOrder = 'asc';
+    }
+    
+    // Reset to first page when sorting changes
+    state.page = 0;
+    performSearch();
+}
+
 // Initialize event listeners
 function initEventListeners() {
     // Search input
@@ -229,6 +249,9 @@ function init() {
     updateUI();
     renderResults();
     initEventListeners();
+    
+    // Expose sort function globally for HTML onclick
+    window.handleNutritionSort = handleNutritionSort;
 }
 
 // Start the app when DOM is loaded

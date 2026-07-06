@@ -55,4 +55,6 @@ export interface AppState {
     error: string | null;
     page: number;
     hasMore: boolean;
+    sortField: string | null;
+    sortOrder: 'asc' | 'desc' | null;
 }

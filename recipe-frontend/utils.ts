@@ -76,7 +76,15 @@ export function createRecipeCard(recipe: any): string {
         ? `<div class="recipe-section">
             <h3>Nutrition</h3>
             <div class="nutrition-grid">
-                ${nutritionData.map(n => `<div class="nutrition-item ${n.value === 'N/A' ? 'na-item' : ''}"><strong>${n.label}</strong>${n.value}</div>`).join("")}
+                ${nutritionData.map(n => {
+                    const fieldName = n.label.toLowerCase().replace(' ', '_');
+                    const sortClass = state.sortField === fieldName ? `sorted-${state.sortOrder}` : '';
+                    return `<div class="nutrition-item ${n.value === 'N/A' ? 'na-item' : ''}" 
+                             onclick="handleNutritionSort('${fieldName}')">
+                                <strong class="nutrition-label ${sortClass}">${n.label}</strong>
+                                <span>${n.value}</span>
+                            </div>`;
+                }).join("")}
             </div>
           </div>`
         : "";

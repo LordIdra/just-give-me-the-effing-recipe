@@ -222,6 +222,22 @@ main {
     display: block;
     font-size: 0.9rem;
     color: var(--accent-color);
+    cursor: pointer;
+    user-select: none;
+}
+
+.nutrition-item strong:hover {
+    text-decoration: underline;
+}
+
+.nutrition-item .sorted-asc::after {
+    content: " ↑";
+    color: var(--accent-color);
+}
+
+.nutrition-item .sorted-desc::after {
+    content: " ↓";
+    color: var(--accent-color);
 }
 
 .nutrition-item.na-item {
