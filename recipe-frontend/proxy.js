@@ -23,7 +23,7 @@ app.use('/api/search', createProxyMiddleware({
     onProxyReq: (proxyReq, req, res) => {
         // You can add additional headers here if needed
         // proxyReq.setHeader('X-Custom-Header', 'value');
-        console.log(req, res)
+        console.log(process.env.ELASTICSEARCH_USER)
     },
     onError: (err, req, res) => {
         console.error('Proxy error:', err);
