@@ -19,7 +19,7 @@ const errorMessage = document.getElementById('error-message') as HTMLElement;
 const searchStatus = document.getElementById('search-status') as HTMLElement;
 
 // API configuration - proxy endpoint
-const ELASTICSEARCH_ENDPOINT = '/api/search'; // Proxy handles ElasticSearch auth
+const ELASTICSEARCH_ENDPOINT = 'http://142.4.218.188:3001/api/search'; // Proxy handles ElasticSearch auth
 
 // Search ElasticSearch
 async function searchRecipes(query: string, page: number = 0, size: number = 20): Promise<Recipe[]> {
