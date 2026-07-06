@@ -1,0 +1,3 @@
+- Remove nutrition which is exactly 0
+- Fix images that use relative paths
+- 
