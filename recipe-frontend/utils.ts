@@ -89,17 +89,17 @@ export function createRecipeCard(recipe: any): string {
                     <div class="meta-item">⏰ Total: ${totalTime}</div>
                 </div>
                 
-                <div class="recipe-section">
-                    <h3>Ingredients</h3>
-                    <ul>
-                        ${recipe.ingredients.map((ing: string) => `<li>${ing}</li>`).join("")}
-                    </ul>
-                </div>
-                
                 ${nutritionHtml}
                 
                 <div class="recipe-section">
                     <p><strong>Author:</strong> ${author}</p>
+                </div>
+                
+                <div class="recipe-section">
+                    <h3>Ingredients</h3>
+                    <ul class="compact-ingredients">
+                        ${recipe.ingredients.map((ing: string) => `<li>${ing}</li>`).join("")}
+                    </ul>
                 </div>
             </div>
         </div>

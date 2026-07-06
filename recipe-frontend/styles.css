@@ -160,7 +160,11 @@ main {
 }
 
 .recipe-section {
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+.recipe-section:last-child {
+    margin-bottom: 0;
 }
 
 .recipe-section h3 {
@@ -173,11 +177,19 @@ main {
 .recipe-section ul {
     list-style: none;
     padding-left: 0;
+    margin: 0.5rem 0;
 }
 
 .recipe-section li {
-    padding: 0.3rem 0;
+    padding: 0.2rem 0;
     color: var(--text-secondary);
+    line-height: 1.3;
+}
+
+.compact-ingredients li {
+    padding: 0.1rem 0;
+    margin: 0;
+    line-height: 1.2;
 }
 
 .nutrition-grid {
