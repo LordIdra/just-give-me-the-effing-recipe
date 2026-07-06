@@ -164,7 +164,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                             ...(state.sortField ? [{
                                 field_value_factor: {
                                     field: state.sortField,
-                                    factor: 100.0,
+                                    factor: 1.0,
                                     missing: 0
                                 }
                             }] : [])
