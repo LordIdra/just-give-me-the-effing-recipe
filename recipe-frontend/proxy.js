@@ -52,7 +52,7 @@ app.get('/health', (req, res) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Proxy server running on port ${PORT}`);
     console.log(`🔒 Proxying to ElasticSearch with Basic Auth`);
     console.log(`📡 Forwarding /api/search to ElasticSearch /recipes/_search`);
