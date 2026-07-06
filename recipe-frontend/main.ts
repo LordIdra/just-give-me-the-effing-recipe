@@ -38,7 +38,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 20)
         await new Promise(resolve => setTimeout(resolve, 300));
         
         // REAL API CALL - Make sure proxy is running
-        const response = await fetch('/api/search', {
+        const response = await fetch('http://142.4.218.188:3001/api/search', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
