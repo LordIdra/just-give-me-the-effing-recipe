@@ -59,49 +59,54 @@ export function createRecipeCard(recipe: any): string {
     const imageUrl = getFirstImage(recipe.images);
     const author = recipe.authors?.length > 0 ? recipe.authors[0] : "Unknown";
 
-    // Nutrition data
-    const nutritionData = [];
-    if (recipe.calories) nutritionData.push({ label: "Calories", value: recipe.calories });
-    if (recipe.carbohydrates) nutritionData.push({ label: "Carbs", value: recipe.carbohydrates + "g" });
-    if (recipe.protein) nutritionData.push({ label: "Protein", value: recipe.protein + "g" });
-    if (recipe.fat) nutritionData.push({ label: "Fat", value: recipe.fat + "g" });
+    // Nutrition data - show all fields, use N/A for missing values
+    const nutritionData = [
+        { label: "Calories", value: recipe.calories || "N/A" },
+        { label: "Carbs", value: recipe.carbohydrates ? recipe.carbohydrates + "g" : "N/A" },
+        { label: "Protein", value: recipe.protein ? recipe.protein + "g" : "N/A" },
+        { label: "Fat", value: recipe.fat ? recipe.fat + "g" : "N/A" },
+        { label: "Saturated", value: recipe.saturated_fat ? recipe.saturated_fat + "g" : "N/A" },
+        { label: "Cholesterol", value: recipe.cholesterol ? recipe.cholesterol + "mg" : "N/A" },
+        { label: "Fiber", value: recipe.fiber ? recipe.fiber + "g" : "N/A" },
+        { label: "Sodium", value: recipe.sodium ? recipe.sodium + "mg" : "N/A" },
+        { label: "Sugar", value: recipe.sugar ? recipe.sugar + "g" : "N/A" }
+    ];
 
     const nutritionHtml = nutritionData.length > 0
         ? `<div class="recipe-section">
             <h3>Nutrition</h3>
             <div class="nutrition-grid">
-                ${nutritionData.map(n => `<div class="nutrition-item"><strong>${n.label}</strong>${n.value}</div>`).join("")}
+                ${nutritionData.map(n => `<div class="nutrition-item"><strong>${n.label}</strong><span class="${n.value === 'N/A' ? 'na-value' : ''}">${n.value}</span></div>`).join("")}
             </div>
           </div>`
         : "";
 
     return `
-        <div class="recipe-card">
-            <img src="${imageUrl}" alt="${recipe.title}" class="recipe-image" loading="lazy">
-            <div class="recipe-content">
-                <h2 class="recipe-title">${recipe.title}</h2>
-                <a href="${recipe.link}" target="_blank" rel="noopener noreferrer" class="recipe-link">View Original Recipe</a>
-                
-                <div class="recipe-meta">
-                    <div class="meta-item">⭐ Rating: ${recipe.rating_count || "No rating"}</div>
-                    <div class="meta-item">⏱️ Prep: ${prepTime}</div>
-                    <div class="meta-item">🍳 Cook: ${cookTime}</div>
-                    <div class="meta-item">⏰ Total: ${totalTime}</div>
-                </div>
-                
-                ${nutritionHtml}
-                
-                <div class="recipe-section">
-                    <p><strong>Author:</strong> ${author}</p>
-                </div>
-                
-                <div class="recipe-section">
-                    <h3>Ingredients</h3>
-                    <ul class="compact-ingredients">
-                        ${recipe.ingredients.map((ing: string) => `<li>${ing}</li>`).join("")}
-                    </ul>
+        <a href="${recipe.link}" target="_blank" rel="noopener noreferrer" class="recipe-card-link">
+            <div class="recipe-card">
+                <img src="${imageUrl}" alt="${recipe.title}" class="recipe-image" loading="lazy">
+                <div class="recipe-content">
+                    <h2 class="recipe-title">${recipe.title}</h2>
+                    <div class="recipe-author">
+                        <strong>Author:</strong> ${author}
+                    </div>
+                    
+                    <div class="recipe-meta">
+                        <div class="meta-item">⏱️ Prep: ${prepTime}</div>
+                        <div class="meta-item">🍳 Cook: ${cookTime}</div>
+                        <div class="meta-item">⏰ Total: ${totalTime}</div>
+                    </div>
+                    
+                    ${nutritionHtml}
+                    
+                    <div class="recipe-section">
+                        <h3>Ingredients</h3>
+                        <ul class="compact-ingredients">
+                            ${recipe.ingredients.map((ing: string) => `<li>${ing}</li>`).join("")}
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
+        </a>
     `;
 }

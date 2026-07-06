@@ -106,7 +106,13 @@ main {
     flex-direction: column;
 }
 
-.recipe-card:hover {
+.recipe-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.recipe-card-link:hover .recipe-card {
     transform: translateY(-4px);
     box-shadow: 0 8px 12px var(--shadow-color);
 }
@@ -125,8 +131,14 @@ main {
 .recipe-title {
     font-size: 1.3rem;
     font-weight: 600;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.5rem;
     color: var(--accent-color);
+}
+
+.recipe-author {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.8rem;
 }
 
 .recipe-meta {
@@ -210,6 +222,12 @@ main {
     display: block;
     font-size: 0.9rem;
     color: var(--accent-color);
+}
+
+.nutrition-item .na-value {
+    color: var(--text-secondary);
+    opacity: 0.7;
+    font-style: italic;
 }
 
 .loading {

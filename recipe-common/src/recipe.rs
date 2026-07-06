@@ -360,7 +360,7 @@ pub async fn add(mut redis_recipes: MultiplexedConnection, recipe: Recipe) -> Re
 
     recipe.date.as_ref().map(|v| pipe.set(key_recipe_date(id), v.to_string()));
     recipe.rating.as_ref().map(|v| {
-        pipe.set(key_recipe_rating_count(id), v);
+        pipe.set(key_recipe_rating(id), v);
         pipe.cmd("zadd").arg(key_aggregated_rating()).arg(v).arg(id)
     });
     recipe.rating_count.as_ref().map(|v| {
