@@ -202,7 +202,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
         return data.hits.hits.map(hit => hit._source);
         
     } catch (error) {
-        if (error.name === 'AbortError') {
+        if (error instanceof Error && error.name === 'AbortError') {
             console.log('Request cancelled by new search');
             return []; // Return empty - new request will handle this
         }
