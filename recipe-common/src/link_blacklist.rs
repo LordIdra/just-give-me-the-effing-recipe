@@ -1,4 +1,5 @@
 use anyhow::Error;
+use log::trace;
 use redis::{aio::MultiplexedConnection, AsyncCommands};
 
 fn key_blacklist() -> String {
@@ -29,6 +30,7 @@ pub async fn is_allowed(mut pool: MultiplexedConnection, link: &str) -> Result<b
 
     for word in blacklist {
         if link.contains(&word) {
+            trace!(word);
             return Ok(false);
         }
     }
