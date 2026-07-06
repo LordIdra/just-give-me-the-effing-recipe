@@ -171,7 +171,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                             }] : [])
                         ],
                         score_mode: "sum",
-                        boost_mode: "multiply"
+                        boost_mode: "sum"
                     }
                 },
                 from: page * size,
