@@ -87,12 +87,23 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                 from: page * size,
                 size: size,
                 sort: state.sortField 
-                    ? [{ [state.sortField]: { order: state.sortOrder || "asc" } }]
+                    ? [{ [state.sortField + '.keyword']: { order: state.sortOrder || "asc", missing: "_last" } }]
                     : [{ _score: { order: "desc" } }]
             })
         });
         
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Search error:', response.status, errorText);
+            
+            // If sorting fails, reset to default and try again
+            if (state.sortField && response.status === 400) {
+                console.warn('Sort field not found, resetting to relevance sort');
+                state.sortField = null;
+                state.sortOrder = null;
+                return searchRecipes(query, page, size); // Retry without sorting
+            }
+            
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
