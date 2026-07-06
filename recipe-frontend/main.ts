@@ -165,13 +165,12 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                                 field_value_factor: {
                                     field: state.sortField,
                                     factor: 100.0,
-                                    modifier: "log1p",
                                     missing: 0
                                 }
                             }] : [])
                         ],
                         score_mode: "sum",
-                        boost_mode: "sum"
+                        boost_mode: "multiply"
                     }
                 },
                 from: page * size,
