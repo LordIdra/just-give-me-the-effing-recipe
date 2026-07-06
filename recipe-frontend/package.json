@@ -1,0 +1,22 @@
+{
+  "name": "just-give-me-the-fucking-recipe-frontend",
+  "version": "1.0.0",
+  "description": "No ad. No communism. No bullshit. Just recipe.",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc && cp index.html dist/ && cp styles.css dist/",
+    "dev": "tsc --watch & live-server dist --port=8080",
+    "start": "live-server dist --port=8080",
+    "proxy": "node proxy.js",
+    "dev:full": "npm run proxy & npm run dev"
+  },
+  "dependencies": {
+    "express": "^4.22.2",
+    "express-basic-auth": "^1.2.1",
+    "http-proxy-middleware": "^2.0.10",
+    "live-server": "^1.2.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -3,3 +3,6 @@
 run.sh
 brightdata.crt
 Cargo.lock
+recipe-frontend/.env
+recipe-frontend/dist/
+recipe-frontend/node_modules/

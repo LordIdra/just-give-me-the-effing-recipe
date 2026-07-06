@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #121212; color: #e0e0e0; }
+        .test-results { background: #1e1e1e; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .pass { color: #4CAF50; }
+        .fail { color: #f44336; }
+    </style>
+</head>
+<body>
+    <h1>Frontend Test Results</h1>
+    <div id="test-results" class="test-results">
+        <h2>Testing frontend components...</h2>
+    </div>
+    
+    <script type="module">
+        // Import the compiled modules
+        import { formatTime, getFirstImage, createRecipeCard } from './dist/utils.js';
+        
+        const resultsDiv = document.getElementById('test-results');
+        
+        function addTestResult(testName, passed, details = '') {
+            const resultClass = passed ? 'pass' : 'fail';
+            const resultText = passed ? 'PASS' : 'FAIL';
+            
+            const testElement = document.createElement('div');
+            testElement.innerHTML = `
+                <h3 class="${resultClass}">${resultText}: ${testName}</h3>
+                ${details ? `<p>${details}</p>` : ''}
+            `;
+            resultsDiv.appendChild(testElement);
+        }
+        
+        // Test formatTime function
+        try {
+            const testCases = [
+                { input: "900", expected: "15m", description: "900 seconds = 15 minutes" },
+                { input: "3600", expected: "1h", description: "3600 seconds = 1 hour" },
+                { input: "3665", expected: "1h 1m", description: "3665 seconds = 1 hour 1 minute" },
+                { input: "0", expected: "N/A", description: "0 seconds = N/A" },
+                { input: "abc", expected: "N/A", description: "Invalid input = N/A" }
+            ];
+            
+            testCases.forEach(test => {
+                const result = formatTime(test.input);
+                const passed = result === test.expected;
+                addTestResult(`formatTime("${test.input}") = "${test.expected}"`, passed, 
+                    passed ? `Got: "${result}"` : `Expected: "${test.expected}", Got: "${result}"`);
+            });
+        } catch (error) {
+            addTestResult('formatTime function', false, `Error: ${error.message}`);
+        }
+        
+        // Test getFirstImage function
+        try {
+            const testCases = [
+                { input: [], expected: "https://via.placeholder.com/400x200?text=No+Image", description: "Empty array" },
+                { input: ["image1.jpg"], expected: "image1.jpg", description: "Single image" },
+                { input: ["image1.jpg", "image2.jpg"], expected: "image1.jpg", description: "Multiple images" }
+            ];
+            
+            testCases.forEach(test => {
+                const result = getFirstImage(test.input);
+                const passed = result === test.expected;
+                addTestResult(`getFirstImage([${test.input.join(', ')}]) = "${test.expected}"`, passed, 
+                    passed ? `Got: "${result}"` : `Expected: "${test.expected}", Got: "${result}"`);
+            });
+        } catch (error) {
+            addTestResult('getFirstImage function', false, `Error: ${error.message}`);
+        }
+        
+        // Test createRecipeCard function
+        try {
+            const mockRecipe = {
+                id: 1,
+                link: "https://example.com/recipe",
+                title: "Test Recipe",
+                description: "A test recipe",
+                date: "2023-01-01",
+                rating_count: "42",
+                prep_time_seconds: "900",
+                cook_time_seconds: "1800",
+                total_time_seconds: "2700",
+                keywords: ["test"],
+                authors: ["Test Chef"],
+                images: ["https://example.com/image.jpg"],
+                ingredients: ["1 lb test", "2 cups water"],
+                instructions: ["Cook test", "Serve hot"],
+                calories: "300",
+                protein: "20"
+            };
+            
+            const cardHtml = createRecipeCard(mockRecipe);
+            const passed = cardHtml.includes('Test Recipe') && 
+                          cardHtml.includes('Test Chef') &&
+                          cardHtml.includes('15m') &&
+                          cardHtml.includes('30m') &&
+                          cardHtml.includes('45m');
+            
+            addTestResult('createRecipeCard function', passed, 
+                passed ? 'Card HTML generated successfully' : 'Card HTML missing expected content');
+        } catch (error) {
+            addTestResult('createRecipeCard function', false, `Error: ${error.message}`);
+        }
+        
+        // Summary
+        const testElements = document.querySelectorAll('.pass, .fail');
+        const passedTests = document.querySelectorAll('.pass').length;
+        const totalTests = testElements.length;
+        
+        const summary = document.createElement('div');
+        summary.innerHTML = `
+            <h2>Test Summary</h2>
+            <p>Passed: ${passedTests}/${totalTests} tests</p>
+            <p>Status: ${passedTests === totalTests ? '✅ ALL TESTS PASSED' : '❌ SOME TESTS FAILED'}</p>
+        `;
+        resultsDiv.appendChild(summary);
+        
+        console.log(`Frontend tests completed: ${passedTests}/${totalTests} passed`);
+    </script>
+</body>
+</html>

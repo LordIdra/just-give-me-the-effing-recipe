@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just give me the fucking recipe</title>
+    <meta name="description" content="No ad. No communism. No bullshit. Just recipe.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Just give me the fucking recipe</h1>
+        <p>No ad. No communism. No bullshit. Just recipe.</p>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search for recipes..." autocomplete="off">
+            <div id="search-status"></div>
+        </div>
+    </header>
+    <main>
+        <div id="results-container" class="results-grid"></div>
+        <div id="loading-indicator" class="loading">Loading more recipes...</div>
+        <div id="error-message" class="error hidden"></div>
+    </main>
+    <script type="module" src="main.ts"></script>
+</body>
+</html>

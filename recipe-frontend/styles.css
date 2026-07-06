@@ -1,0 +1,225 @@
+:root {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent-color: #ff6b6b;
+    --border-color: #333;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 0;
+    margin: 0;
+}
+
+header {
+    text-align: center;
+    padding: 2rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--accent-color);
+}
+
+header p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.search-container {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+#search-input {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-color);
+    transition: border-color 0.3s;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+#search-status {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    height: 1.2rem;
+}
+
+main {
+    padding: 1rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+    .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .results-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.recipe-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.recipe-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 12px var(--shadow-color);
+}
+
+.recipe-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.recipe-content {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+.recipe-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    color: var(--accent-color);
+}
+
+.recipe-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+}
+
+.meta-item i {
+    margin-right: 0.3rem;
+}
+
+.recipe-link {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.recipe-link:hover {
+    text-decoration: underline;
+}
+
+.recipe-section {
+    margin-bottom: 1rem;
+}
+
+.recipe-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--accent-color);
+}
+
+.recipe-section ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.recipe-section li {
+    padding: 0.3rem 0;
+    color: var(--text-secondary);
+}
+
+.nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.5rem;
+}
+
+.nutrition-item {
+    background-color: rgba(255, 107, 107, 0.1);
+    padding: 0.5rem;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.nutrition-item strong {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--accent-color);
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    display: none;
+}
+
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.1);
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+.error.hidden {
+    display: none;
+}
+
+.loading.active {
+    display: block;
+}
