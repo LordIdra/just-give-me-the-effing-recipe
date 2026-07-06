@@ -108,26 +108,31 @@ pub async fn process_follow(
     let new_links = follower::follow(contents, link.to_string()).await;
 
     let mut added_links = vec![];
+    let mut blacklisted_count = 0;
+    let mut already_existed_count = 0;
     for new_link in &new_links {
         let new_remaining_follows = if recipe_exists {
             2
         } else {
             remaining_follows - 1
         };
-        let added = match link::add(redis_links.clone(), new_link, Some(&link), new_priority, new_remaining_follows).await {
-            Ok(ok) => matches!(ok, LinkAddResult::Added(_)),
+        match link::add(redis_links.clone(), new_link, Some(&link), new_priority, new_remaining_follows).await {
+            Ok(ok) => match ok {
+                LinkAddResult::Added(_) => added_links.push(new_link),
+                LinkAddResult::AlreadyExists => already_existed_count += 1,
+                LinkAddResult::Blacklisted => blacklisted_count += 1,
+            }
             // don't return if the link is missing a domain
-            Err(err) => match err.downcast_ref::<LinkMissingDomainError>() {
-                Some(_) => false,
-                None => return Err(err),
+            Err(err) => if err.downcast_ref::<LinkMissingDomainError>().is_none() {
+                return Err(err)
             }
         };
-        if added {
-            added_links.push(new_link) 
-        }
     }
 
-    trace!("Followed {}/{} links from {}: {:?} (ORIGINAL: {:?})", added_links.len(), new_links.len(), link, &added_links, &new_links);
+    trace!(
+        "Followed links from {} (total: {}, added: {}, blacklisted: {}, already existed: {}): {:?})", 
+        link, new_links.len(), added_links.len(), blacklisted_count, already_existed_count, new_links
+    );
 
     Ok(())
 }
