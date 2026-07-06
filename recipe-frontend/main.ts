@@ -21,6 +21,9 @@ const loadingIndicator = document.getElementById('loading-indicator') as HTMLEle
 const errorMessage = document.getElementById('error-message') as HTMLElement;
 const searchStatus = document.getElementById('search-status') as HTMLElement;
 
+// Track active request for cancellation
+let activeRequest: AbortController | null = null;
+
 // API configuration
 // For production: const ELASTICSEARCH_ENDPOINT = '/api/search'; // Requires proxy setup
 // For development: using mock data below
@@ -30,12 +33,27 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
     if (!query.trim()) return [];
 
     try {
+        // Cancel any active request
+        if (activeRequest) {
+            activeRequest.abort();
+        }
+        
+        // Create new abort controller for this request
+        const controller = new AbortController();
+        activeRequest = controller;
+        
         // In a real implementation, this would be a proper ElasticSearch query
         // For now, we'll simulate it with a mock response
         console.log(`Searching for "${query}" page ${page}`);
         
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Simulate API call delay with cancellation support
+        await new Promise((resolve, reject) => {
+            const timeout = setTimeout(resolve, 300);
+            controller.signal.addEventListener('abort', () => {
+                clearTimeout(timeout);
+                reject(new DOMException('Request cancelled', 'AbortError'));
+            });
+        });
                
         // Simulate API call delay
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -46,6 +64,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
             headers: {
                 'Content-Type': 'application/json',
             },
+            signal: controller.signal,
             body: JSON.stringify({
                 query: {
                     function_score: {
@@ -176,6 +195,11 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
         return data.hits.hits.map(hit => hit._source);
         
     } catch (error) {
+        if (error.name === 'AbortError') {
+            console.log('Request cancelled by new search');
+            return []; // Return empty - new request will handle this
+        }
+        
         console.error('Search error:', error);
         throw error;
     }
