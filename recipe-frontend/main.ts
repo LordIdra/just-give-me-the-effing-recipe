@@ -87,7 +87,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                 from: page * size,
                 size: size,
                 sort: state.sortField 
-                    ? [{ [state.sortField + '.keyword']: { order: state.sortOrder || "asc", missing: "_last" } }]
+                    ? [{ [state.sortField]: { order: state.sortOrder || "asc", missing: "_last" } }]
                     : [{ _score: { order: "desc" } }]
             })
         });
