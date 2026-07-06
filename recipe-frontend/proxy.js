@@ -14,7 +14,7 @@ app.use(cors({
 
 // Proxy to ElasticSearch with Basic Auth
 app.use('/api/search', createProxyMiddleware({
-    target: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
+    target: process.env.ELASTICSEARCH_URL || 'https://localhost:9200',
     changeOrigin: true,
     pathRewrite: { '^/api/search': '/recipes/_search' },
     auth: `${process.env.ELASTICSEARCH_USER}:${process.env.ELASTICSEARCH_PASSWORD}`,
@@ -24,7 +24,11 @@ app.use('/api/search', createProxyMiddleware({
     },
     onError: (err, req, res) => {
         console.error('Proxy error:', err);
-        res.status(500).json({ error: 'Proxy error' });
+        res.status(500).json({ 
+            error: 'ElasticSearch connection failed',
+            details: err.message,
+            hint: 'Check if ElasticSearch is running and accessible'
+        });
     }
 }));
 
