@@ -146,7 +146,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                         ...(state.sortField ? [{
                             field_value_factor: {
                                 field: state.sortField,
-                                factor: state.sortOrder === 'desc' ? 0.05 : -0.05,
+                                factor: state.sortOrder === 'desc' ? 0.5 : -0.5,
                                 modifier: 'none',
                                 missing: 0
                             }
