@@ -142,6 +142,15 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                                 weight: 1
                             }
                         ],
+                        // Add sort field as a weighting factor when selected
+                        ...(state.sortField ? [{
+                            field_value_factor: {
+                                field: state.sortField,
+                                factor: state.sortOrder === 'desc' ? 0.05 : -0.05,
+                                modifier: 'none',
+                                missing: 0
+                            }
+                        }] : [])
                         score_mode: "sum",
                         boost_mode: "multiply",
                         max_boost: 3
@@ -149,9 +158,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                 },
                 from: page * size,
                 size: size,
-                sort: state.sortField 
-                    ? [{ [state.sortField]: { order: state.sortOrder || "asc", missing: "_last" } }]
-                    : [{ _score: { order: "desc" } }],
+                sort: [{ _score: { order: "desc" } }],
                 track_total_hits: true
             })
         });
