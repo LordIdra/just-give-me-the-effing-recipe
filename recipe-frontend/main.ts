@@ -39,7 +39,7 @@ async function searchRecipes(query: string, page: number = 0, size: number = 20)
         
         // REAL API CALL - Make sure proxy is running
         const response = await fetch('/api/search', {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
