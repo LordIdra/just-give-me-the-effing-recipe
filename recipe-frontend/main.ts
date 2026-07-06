@@ -142,20 +142,10 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                                 weight: 1
                             }
                         ],
-                        // Add sort field as a weighting factor when selected
+                        // Use a simple boost based on sort field presence and value
                         ...(state.sortField ? [{
                             filter: { exists: { field: state.sortField } },
-                            weight: 10
-                        }] : []),
-                        
-                        // Apply directional weighting based on sort order
-                        ...(state.sortField ? [{
-                            field_value_factor: {
-                                field: state.sortField,
-                                factor: state.sortOrder === 'desc' ? 1 : -1,
-                                modifier: 'none',
-                                missing: 0
-                            }
+                            weight: 20  // Strong boost for having the field
                         }] : []),
                         score_mode: "sum",
                         boost_mode: "multiply",
@@ -164,7 +154,12 @@ async function searchRecipes(query: string, page: number = 0, size: number = 18)
                 },
                 from: page * size,
                 size: size,
-                sort: [{ _score: { order: "desc" } }],
+                sort: state.sortField 
+                    ? [
+                        { _score: { order: "desc" } },  // Primary sort by relevance
+                        { [state.sortField]: { order: state.sortOrder || "asc", missing: "_last" } }  // Secondary sort by field
+                      ]
+                    : [{ _score: { order: "desc" } }],
                 track_total_hits: true
             })
         });
