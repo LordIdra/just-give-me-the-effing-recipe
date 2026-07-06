@@ -136,7 +136,10 @@ pub async fn add(
     priority: f32,
     remaining_follows: i32,
 ) -> Result<LinkAddResult, Error> {
-    if !link_blacklist::is_allowed(pool.clone(), link).await? || exists(pool.clone(), link).await? {
+    if exists(pool.clone(), link).await? {
+        return Ok(LinkAddResult::AlreadyExists);
+    }
+    if !link_blacklist::is_allowed(pool.clone(), link).await? {
         return Ok(LinkAddResult::Blacklisted);
     }
 
