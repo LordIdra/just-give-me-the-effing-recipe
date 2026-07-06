@@ -14,10 +14,12 @@ app.use(cors({
 
 // Proxy to ElasticSearch with Basic Auth
 app.use('/api/search', createProxyMiddleware({
-    target: process.env.ELASTICSEARCH_URL || 'https://localhost:9200',
+    target: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
     changeOrigin: true,
     pathRewrite: { '^/api/search': '/recipes/_search' },
     auth: `${process.env.ELASTICSEARCH_USER}:${process.env.ELASTICSEARCH_PASSWORD}`,
+    secure: false, // Allow self-signed certificates
+    rejectUnauthorized: false, // Disable SSL verification for self-signed certs
     onProxyReq: (proxyReq, req, res) => {
         // You can add additional headers here if needed
         // proxyReq.setHeader('X-Custom-Header', 'value');
